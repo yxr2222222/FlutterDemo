@@ -1,5 +1,5 @@
-abstract class OnPermissionCallback {
-  void onGranted();
+class OnPermissionCallback {
+  void onGranted() {}
 
-  void onDenied(bool isPermanentlyDenied);
+  void onDenied(bool isPermanentlyDenied) {}
 }

@@ -25,6 +25,7 @@ abstract class BaseWidgetState<VM extends BaseVM, W extends BaseWidget<VM>>
   BuildContext? _currLoading;
 
   bool _created = false;
+  bool _Resumed = false;
   AppLifecycleListener? _lifecycleListener;
 
   @override
@@ -114,8 +115,9 @@ abstract class BaseWidgetState<VM extends BaseVM, W extends BaseWidget<VM>>
   }
 
   void _onResume(bool isFromLifecycle) {
-    if (_created) {
+    if (_created && !_Resumed) {
       if (!isFromLifecycle || ModalRoute.of(context)?.isCurrent == true) {
+        _Resumed = true;
         onResume();
         viewModel.onResume();
       }
@@ -123,8 +125,9 @@ abstract class BaseWidgetState<VM extends BaseVM, W extends BaseWidget<VM>>
   }
 
   void _onPause(bool isFromLifecycle) {
-    if (_created) {
+    if (_created && _Resumed) {
       if (!isFromLifecycle || ModalRoute.of(context)?.isCurrent == true) {
+        _Resumed = false;
         onPause();
         viewModel.onPause();
       }

@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_demo/HttpTestVM.dart';
 import 'package:flutter_demo/base/widget/BaseMultiStateWidget.dart';
 
-class HttpTestWidget extends BaseMultiStateWidget<HttpTestVM> {
-  HttpTestWidget({super.key}) : super(viewModel: HttpTestVM());
+import 'base/vm/BaseMultiStateVM.dart';
+import 'model/app_update.dart';
+
+class HttpTestWidget extends BaseMultiStateWidget<_HttpTestVM> {
+  HttpTestWidget({super.key}) : super(viewModel: _HttpTestVM());
 
   @override
   State<StatefulWidget> createState() => _HttpTestWidgetState();
 }
 
 class _HttpTestWidgetState
-    extends BaseMultiStateWidgetState<HttpTestVM, HttpTestWidget> {
+    extends BaseMultiStateWidgetState<_HttpTestVM, HttpTestWidget> {
   @override
-  Widget createContentView(BuildContext context, HttpTestVM viewModel) {
+  Widget createContentView(BuildContext context, _HttpTestVM viewModel) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -37,5 +39,38 @@ class _HttpTestWidgetState
         ),
       ],
     );
+  }
+}
+
+class _HttpTestVM extends BaseMultiStateVM {
+  AppUpdate? _appUpdate;
+
+  AppUpdate? get appUpdate => _appUpdate;
+
+  @override
+  void onCreate() {
+    super.onCreate();
+    requestAppUpdate();
+  }
+
+  @override
+  void onRetry() {
+    requestAppUpdate();
+  }
+
+  /// 请求应用更新信息
+  void requestAppUpdate() {
+    request<AppUpdate>(
+        path: "/pub/appUpdate/getAppUpdate",
+        loadingTxt: "loading...",
+        params: {"os": "0", "machine": "afhkeagjhakgaekl", "version": "1.0.0"},
+        onFromJson: (Map<String, dynamic> json) {
+          return AppUpdate.fromJson(json['data']);
+        },
+        onSuccess: (AppUpdate? data) {
+          _appUpdate = data;
+          appbarTitle = data?.title ?? "未知标题";
+          notifyListeners();
+        });
   }
 }

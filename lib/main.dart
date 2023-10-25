@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/HttpTestWidget.dart';
+import 'package:flutter_demo/base/callback/OnPermissionCallback.dart';
 import 'package:flutter_demo/base/extension/BuildContextExtension.dart';
+import 'package:flutter_demo/base/model/PermissionReq.dart';
 import 'package:flutter_demo/base/vm/BaseListVM.dart';
 import 'package:flutter_demo/base/widget/BaseMultiStateWidget.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'base/http/HttpManager.dart';
 import 'base/http/model/BaseRespConfig.dart';
 import 'base/widget/BaseItemWidget.dart';
@@ -51,6 +54,13 @@ class _MyHomePageState
               context.push(HttpTestWidget());
             } else if (_MyHomePageVM.REFRESH == itemBinding.item) {
               viewModel.showLoading(cancelable: true);
+            } else if (_MyHomePageVM.PERMISSION == itemBinding.item) {
+              viewModel.requestPermission(PermissionReq(
+                  [Permission.camera, Permission.location], onGranted: () {
+                showToast("权限申请成功");
+              }, onDenied: (isPermanentlyDenied) {
+                showToast("权限申请失败,是否被多次拒绝或永久拒绝: $isPermanentlyDenied");
+              }));
             }
           },
           child: Container(
@@ -72,6 +82,7 @@ class _MyHomePageState
 class _MyHomePageVM extends BaseListVM<String, ItemBinding<String>> {
   static const String API = "API请求示例";
   static const String REFRESH = "下拉刷新/上拉加载";
+  static const String PERMISSION = "权限申请";
 
   @override
   void onCreate() {
@@ -79,7 +90,10 @@ class _MyHomePageVM extends BaseListVM<String, ItemBinding<String>> {
 
     appbarTitle = "FlutterDemo";
 
-    refreshData(
-        isClear: true, dataList: [ItemBinding(API), ItemBinding(REFRESH)]);
+    refreshData(isClear: true, dataList: [
+      ItemBinding(API),
+      ItemBinding(REFRESH),
+      ItemBinding(PERMISSION)
+    ]);
   }
 }
