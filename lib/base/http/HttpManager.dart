@@ -8,6 +8,7 @@ import 'package:flutter_demo/base/http/cache/HttpCacheInterceptor.dart';
 import 'package:flutter_demo/base/http/interceptor/RequestInterceptor.dart';
 import 'package:flutter_demo/base/util/Log.dart';
 
+import '../model/BaseResp.dart';
 import 'cache/CacheConfig.dart';
 import 'exception/CstHttpException.dart';
 import 'model/BaseRespConfig.dart';
@@ -25,6 +26,8 @@ class HttpManager {
 
   late BaseRespConfig _respConfig;
   late bool _debug;
+
+  bool get debug => _debug;
 
   /// 私有的命名构造函数
   HttpManager._internal() {
@@ -134,52 +137,104 @@ class HttpManager {
     int? cacheTime,
     String? customCacheKey,
   }) {
-    try {
-      Options option =
-          _copyOptions(options, cacheMode, cacheTime, customCacheKey);
+    var future = _requestWithFuture<dynamic>(
+        path: path,
+        reqType: reqType,
+        params: params,
+        options: options,
+        body: body,
+        cancelToken: cancelToken,
+        respConfig: respConfig,
+        cacheMode: cacheMode,
+        cacheTime: cacheTime,
+        customCacheKey: customCacheKey);
 
-      Future<Response> future;
-      switch (reqType) {
-        case ReqType.post:
-          {
-            future = _dio.post(path,
-                data: body,
-                queryParameters: params,
-                options: option,
-                cancelToken: cancelToken);
-            break;
-          }
-        case ReqType.put:
-          {
-            future = _dio.put(path,
-                data: body,
-                queryParameters: params,
-                options: option,
-                cancelToken: cancelToken);
-            break;
-          }
-        case ReqType.delete:
-          {
-            future = _dio.delete(path,
-                data: body,
-                queryParameters: params,
-                options: option,
-                cancelToken: cancelToken);
-            break;
-          }
-        default:
-          {
-            future = _dio.get(path,
-                queryParameters: params,
-                options: option,
-                cancelToken: cancelToken);
-          }
-      }
+    _callFuture(future, respConfig, onFromJson, onSuccess, onFailed);
+  }
 
-      _callFuture(future, respConfig, onFromJson, onSuccess, onFailed);
-    } on Exception catch (e) {
-      _onFailed(onFailed, CstHttpException.createHttpException(e));
+  Future<BaseResp<T>> requestWithFuture<T>({
+    required String path,
+    required OnFromJson<T>? onFromJson,
+    ReqType reqType = ReqType.get,
+    Map<String, dynamic>? params,
+    Options? options,
+    Object? body,
+    CancelToken? cancelToken,
+    BaseRespConfig? respConfig,
+    CacheMode? cacheMode = CacheMode.ONLY_NETWORK,
+    int? cacheTime,
+    String? customCacheKey,
+  }) async {
+    var future = _requestWithFuture<dynamic>(
+        path: path,
+        reqType: reqType,
+        params: params,
+        options: options,
+        body: body,
+        cancelToken: cancelToken,
+        respConfig: respConfig,
+        cacheMode: cacheMode,
+        cacheTime: cacheTime,
+        customCacheKey: customCacheKey);
+
+    Response response = await future;
+    return _parseResponseThenCallback(
+        response, respConfig, onFromJson, null, null);
+  }
+
+  Future<Response<T>> _requestWithFuture<T>({
+    required String path,
+    ReqType reqType = ReqType.get,
+    Map<String, dynamic>? params,
+    Options? options,
+    Object? body,
+    CancelToken? cancelToken,
+    BaseRespConfig? respConfig,
+    CacheMode? cacheMode = CacheMode.ONLY_NETWORK,
+    int? cacheTime,
+    String? customCacheKey,
+  }) {
+    Options option =
+        _copyOptions(options, cacheMode, cacheTime, customCacheKey);
+
+    Future<Response<T>> future;
+    switch (reqType) {
+      case ReqType.post:
+        {
+          future = _dio.post(path,
+              data: body,
+              queryParameters: params,
+              options: option,
+              cancelToken: cancelToken);
+          break;
+        }
+      case ReqType.put:
+        {
+          future = _dio.put(path,
+              data: body,
+              queryParameters: params,
+              options: option,
+              cancelToken: cancelToken);
+          break;
+        }
+      case ReqType.delete:
+        {
+          future = _dio.delete(path,
+              data: body,
+              queryParameters: params,
+              options: option,
+              cancelToken: cancelToken);
+          break;
+        }
+      default:
+        {
+          future = _dio.get(path,
+              queryParameters: params,
+              options: option,
+              cancelToken: cancelToken);
+        }
     }
+    return future;
   }
 
   /// 复制缓存options
@@ -196,7 +251,7 @@ class HttpManager {
     return requestOptions;
   }
 
-  void _parseResponseThenCallback<T>(
+  BaseResp<T> _parseResponseThenCallback<T>(
       Response response,
       BaseRespConfig? respConfig,
       OnFromJson<T>? onFromJson,
@@ -220,8 +275,9 @@ class HttpManager {
       }
 
       if (body == null) {
-        _onFailed(onFailed, CstHttpException(-1, "内容为空"));
-        return;
+        var error = CstHttpException(-1, "内容为空");
+        _onFailed(onFailed, error);
+        return BaseResp(false, error: error);
       }
 
       // bytes转String并保存
@@ -236,16 +292,19 @@ class HttpManager {
         data = onFromJson == null ? null : onFromJson(result);
       }
     } catch (e) {
-      _onFailed(onFailed,
-          CstHttpException(-1, "Json解析失败", detailMessage: e.toString()));
+      var error = CstHttpException(-1, "Json解析失败", detailMessage: e.toString());
+      _onFailed(onFailed, error);
+      return BaseResp(false, error: error);
     }
 
     if (code != successCode) {
-      _onFailed(onFailed, CstHttpException(code, msg ?? "业务错误码不等于业务成功码"));
-      return;
+      var error = CstHttpException(code, msg ?? "业务错误码不等于业务成功码");
+      _onFailed(onFailed, error);
+      return BaseResp(false, error: error);
     }
 
     _onSuccess(onSuccess, data);
+    return BaseResp(true, data: data);
   }
 
   void _onSuccess<T>(OnSuccess<T>? onSuccess, T? data) {

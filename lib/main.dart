@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/HttpTestWidget.dart';
-import 'package:flutter_demo/base/callback/OnPermissionCallback.dart';
 import 'package:flutter_demo/base/extension/BuildContextExtension.dart';
 import 'package:flutter_demo/base/model/PermissionReq.dart';
 import 'package:flutter_demo/base/vm/BaseListVM.dart';
+import 'package:flutter_demo/base/widget/BaseListWidget.dart';
 import 'package:flutter_demo/base/widget/BaseMultiStateWidget.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'base/http/HttpManager.dart';
 import 'base/http/model/BaseRespConfig.dart';
-import 'base/widget/BaseItemWidget.dart';
+import 'base/model/ItemBinding.dart';
 
 void main() {
   HttpManager.getInstance().init("http://192.168.1.113:8089/", true,
@@ -44,42 +44,47 @@ class _MyHomePageState
     extends BaseMultiStateWidgetState<_MyHomePageVM, _MyHomePage> {
   @override
   Widget createContentView(BuildContext context, _MyHomePageVM viewModel) {
-    return ListView.builder(
-      itemCount: viewModel.itemBindingList.length,
-      itemBuilder: (context, index) {
-        var itemBinding = viewModel.itemBindingList[index];
-        return GestureDetector(
-          onTap: () {
-            if (_MyHomePageVM.API == itemBinding.item) {
-              context.push(HttpTestWidget());
-            } else if (_MyHomePageVM.REFRESH == itemBinding.item) {
-              viewModel.showLoading(cancelable: true);
-            } else if (_MyHomePageVM.PERMISSION == itemBinding.item) {
-              viewModel.requestPermission(PermissionReq(
-                  [Permission.camera, Permission.location], onGranted: () {
-                showToast("权限申请成功");
-              }, onDenied: (isPermanentlyDenied) {
-                showToast("权限申请失败,是否被多次拒绝或永久拒绝: $isPermanentlyDenied");
-              }));
-            }
-          },
-          child: Container(
-              width: double.infinity,
-              height: 48,
-              alignment: Alignment.center,
-              decoration: const BoxDecoration(color: Color(0xffffffff)),
-              margin: const EdgeInsets.only(top: 0.5),
-              child: Text(
-                itemBinding.item,
-                style: const TextStyle(fontSize: 16, color: Color(0xff333333)),
-              )),
-        );
+    return BaseListWidget<MainTitle, ItemBinding<MainTitle>>.builder(
+      viewModel,
+      onItemClick: (context, index, ItemBinding<MainTitle> itemBinding) {
+        if (_MyHomePageVM.API == itemBinding.item.title) {
+          context.push(HttpTestWidget());
+        } else if (_MyHomePageVM.REFRESH == itemBinding.item.title) {
+          viewModel.showLoading(cancelable: true);
+        } else if (_MyHomePageVM.PERMISSION == itemBinding.item.title) {
+          viewModel.requestPermission(PermissionReq(
+              [Permission.camera, Permission.location], onGranted: () {
+            showToast("权限申请成功");
+          }, onDenied: (isPermanentlyDenied) {
+            showToast("权限申请失败,是否被多次拒绝或永久拒绝: $isPermanentlyDenied");
+          }));
+        }
+
+        // MVVM刷新
+        if (itemBinding.item.background.value == Colors.white.value) {
+          itemBinding.item.background = Colors.blueGrey;
+        } else {
+          itemBinding.item.background = Colors.white;
+        }
+        itemBinding.update();
+      },
+      childItemBuilder: (context, index, ItemBinding<MainTitle> itemBinding) {
+        return Container(
+            width: double.infinity,
+            height: 48,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(color: itemBinding.item.background),
+            margin: const EdgeInsets.only(top: 0.5),
+            child: Text(
+              itemBinding.item.title,
+              style: const TextStyle(fontSize: 16, color: Color(0xff333333)),
+            ));
       },
     );
   }
 }
 
-class _MyHomePageVM extends BaseListVM<String, ItemBinding<String>> {
+class _MyHomePageVM extends BaseListVM<MainTitle, ItemBinding<MainTitle>> {
   static const String API = "API请求示例";
   static const String REFRESH = "下拉刷新/上拉加载";
   static const String PERMISSION = "权限申请";
@@ -91,9 +96,16 @@ class _MyHomePageVM extends BaseListVM<String, ItemBinding<String>> {
     appbarTitle = "FlutterDemo";
 
     refreshData(isClear: true, dataList: [
-      ItemBinding(API),
-      ItemBinding(REFRESH),
-      ItemBinding(PERMISSION)
+      ItemBinding(MainTitle(API)),
+      ItemBinding(MainTitle(REFRESH)),
+      ItemBinding(MainTitle(PERMISSION))
     ]);
   }
+}
+
+class MainTitle {
+  final String title;
+  Color background = Colors.white;
+
+  MainTitle(this.title);
 }

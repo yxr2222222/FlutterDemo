@@ -8,6 +8,7 @@ import '../http/cache/CacheMode.dart';
 import '../http/exception/CstHttpException.dart';
 import '../http/model/BaseRespConfig.dart';
 import '../http/model/ReqType.dart';
+import '../model/BaseResp.dart';
 import '../model/PermissionReq.dart';
 import '../util/PermissionUtil.dart';
 
@@ -150,6 +151,33 @@ abstract class BaseVM extends ChangeNotifier {
             }
           }
         },
+        reqType: reqType,
+        params: params,
+        options: options,
+        body: body,
+        cancelToken: cancelToken,
+        respConfig: respConfig,
+        cacheMode: cacheMode,
+        cacheTime: cacheTime,
+        customCacheKey: customCacheKey);
+  }
+
+  Future<BaseResp<T>> requestWithFuture<T>({
+    required String path,
+    required OnFromJson<T>? onFromJson,
+    ReqType reqType = ReqType.get,
+    Map<String, dynamic>? params,
+    Options? options,
+    Object? body,
+    CancelToken? cancelToken,
+    BaseRespConfig? respConfig,
+    CacheMode? cacheMode = CacheMode.ONLY_NETWORK,
+    int? cacheTime,
+    String? customCacheKey,
+  }) async {
+    return HttpManager.getInstance().requestWithFuture<T>(
+        path: path,
+        onFromJson: onFromJson,
         reqType: reqType,
         params: params,
         options: options,

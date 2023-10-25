@@ -1,6 +1,6 @@
 import 'package:flutter_demo/base/vm/BaseMultiStateVM.dart';
 
-import '../widget/BaseItemWidget.dart';
+import '../model/ItemBinding.dart';
 
 abstract class BaseListVM<T, IB extends ItemBinding<T>>
     extends BaseMultiStateVM {
