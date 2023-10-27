@@ -3,7 +3,6 @@ import 'package:flutter_demo/HttpTestWidget.dart';
 import 'package:flutter_demo/RefreshLoadTestWidget.dart';
 import 'package:flutter_demo/base/extension/BuildContextExtension.dart';
 import 'package:flutter_demo/base/model/PermissionReq.dart';
-import 'package:flutter_demo/base/util/GetBuilderUtil.dart';
 import 'package:flutter_demo/base/vm/BaseListVM.dart';
 import 'package:flutter_demo/base/widget/BaseMultiStateWidget.dart';
 import 'package:flutter_demo/tab/ViewPagerTest.dart';
@@ -47,44 +46,33 @@ class _MyHomePageState
   @override
   Widget createContentView(BuildContext context, _MyHomePageVM viewModel) {
     return viewModel.listBuilder(
-      onItemClick: (itemWidget, context) {
-        if (_MyHomePageVM.API == itemWidget.item.title) {
+      onItemClick: (item, context) {
+        if (_MyHomePageVM.API == item.item.title) {
           context.push(HttpTestWidget());
-        } else if (_MyHomePageVM.PERMISSION == itemWidget.item.title) {
+        } else if (_MyHomePageVM.PERMISSION == item.item.title) {
           viewModel.requestPermission(PermissionReq(
               [Permission.camera, Permission.location], onGranted: () {
             showToast("权限申请成功");
           }, onDenied: (isPermanentlyDenied) {
             showToast("权限申请失败,是否被多次拒绝或永久拒绝: $isPermanentlyDenied");
           }));
-        } else if (_MyHomePageVM.REFRESH == itemWidget.item.title) {
+        } else if (_MyHomePageVM.REFRESH == item.item.title) {
           context.push(RefreshLoadTestWidget());
-        } else if (_MyHomePageVM.VIEW_PAGER == itemWidget.item.title) {
+        } else if (_MyHomePageVM.VIEW_PAGER == item.item.title) {
           context.push(ViewPagerTest());
-        }
-
-        var controller = itemWidget.getController(itemWidget.item.background);
-        if (controller.data?.value == Colors.white.value) {
-          controller.data = Colors.blueGrey;
-        } else {
-          controller.data = Colors.white;
         }
       },
       childItemBuilder: (itemWidget, context) {
-        var controller = itemWidget.getController(itemWidget.item.background);
-
-        return GetBuilderUtil.builder((controller) {
-          return Container(
-              width: double.infinity,
-              height: 48,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(color: controller.data),
-              margin: const EdgeInsets.only(top: 0.5),
-              child: Text(
-                itemWidget.item.title,
-                style: const TextStyle(fontSize: 16, color: Color(0xff333333)),
-              ));
-        }, init: controller);
+        return Container(
+            width: double.infinity,
+            height: 48,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(color: itemWidget.item.background),
+            margin: const EdgeInsets.only(top: 0.5),
+            child: Text(
+              itemWidget.item.title,
+              style: const TextStyle(fontSize: 16, color: Color(0xff333333)),
+            ));
       },
     );
   }

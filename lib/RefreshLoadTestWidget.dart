@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/base/model/BaseResp.dart';
 import 'package:flutter_demo/base/model/PageResult.dart';
-import 'package:flutter_demo/base/util/GetBuilderUtil.dart';
 import 'package:flutter_demo/base/vm/BasePageListVM.dart';
 import 'package:flutter_demo/base/widget/BaseMultiStateWidget.dart';
 
@@ -18,13 +17,10 @@ class _RefreshLoadTestWidgetState extends BaseMultiStateWidgetState<
     _RefreshLoadTestVM, RefreshLoadTestWidget> {
   @override
   Widget createContentView(BuildContext context, _RefreshLoadTestVM viewModel) {
-    return viewModel.listRefreshBuilder(onItemClick: (itemWidget, context) {
-      var controller = itemWidget.getController(itemWidget.item.clickNum);
-
-      controller.data = controller.dataNotNull + 1;
-    }, childItemBuilder: (itemWidget, context) {
-      var controller = itemWidget.getController(itemWidget.item.clickNum);
-
+    return viewModel.listRefreshBuilder(onItemClick: (item, context) {
+      item.item.clickNum = item.item.clickNum + 1;
+      item.refresh();
+    }, childItemBuilder: (item, context) {
       return Container(
           width: double.infinity,
           height: 64,
@@ -35,16 +31,13 @@ class _RefreshLoadTestWidgetState extends BaseMultiStateWidgetState<
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                itemWidget.item.title ?? "",
+                item.item.title ?? "",
                 style: const TextStyle(fontSize: 16, color: Color(0xff333333)),
               ),
-              GetBuilderUtil.builder(
-                  (controller) => Text(
-                        "点击数: ${controller.data}",
-                        style: const TextStyle(
-                            fontSize: 12, color: Color(0xff999999)),
-                      ),
-                  init: controller)
+              Text(
+                "点击数: ${item.item.clickNum}",
+                style: const TextStyle(fontSize: 12, color: Color(0xff999999)),
+              )
             ],
           ));
     });
@@ -90,6 +83,6 @@ class TesItem {
 
   @override
   String toString() {
-    return "$title, $clickNum";
+    return "title: $title, clickNum: $clickNum";
   }
 }

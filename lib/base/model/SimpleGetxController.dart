@@ -14,4 +14,8 @@ class SimpleGetxController<T> extends BaseGetxController {
     _data = value;
     update();
   }
+
+  void selfRefresh() {
+    data = _data;
+  }
 }
