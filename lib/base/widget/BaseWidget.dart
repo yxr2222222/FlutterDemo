@@ -59,17 +59,19 @@ abstract class BaseWidgetState<VM extends BaseVM, W extends BaseWidget<VM>>
   Widget build(BuildContext context) {
     super.build(context);
     this._context = context;
-    return VisibilityDetector(
-        key: UniqueKey(),
-        child: createChild(context, viewModel),
-        onVisibilityChanged: (visibilityInfo) {
-          var visiblePercentage = visibilityInfo.visibleFraction * 100;
-          if (visiblePercentage >= 80) {
-            _onResume(false);
-          } else {
-            _onPause(false);
-          }
-        });
+    return WillPopScope(
+        child: VisibilityDetector(
+            key: UniqueKey(),
+            child: createChild(context, viewModel),
+            onVisibilityChanged: (visibilityInfo) {
+              var visiblePercentage = visibilityInfo.visibleFraction * 100;
+              if (visiblePercentage >= 80) {
+                _onResume(false);
+              } else {
+                _onPause(false);
+              }
+            }),
+        onWillPop: () => Future(() => viewModel.onBackPressed()));
   }
 
   @override

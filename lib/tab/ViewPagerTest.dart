@@ -45,4 +45,10 @@ class _ViewPagerTestState
   }
 }
 
-class _ViewPagerVM extends BaseMultiStateVM {}
+class _ViewPagerVM extends BaseMultiStateVM {
+  @override
+  void onCreate() {
+    super.onCreate();
+    appbarController.appbarTitle = "ViewPager示例";
+  }
+}

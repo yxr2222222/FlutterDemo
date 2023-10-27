@@ -88,6 +88,7 @@ class _MyHomePageVM extends BaseListVM<MainTitle> {
   void onCreate() {
     super.onCreate();
 
+    appbarController.appbarBackIcon = null;
     appbarController.appbarTitle = "FlutterDemo";
 
     refreshData(isClear: true, dataList: [
@@ -97,6 +98,9 @@ class _MyHomePageVM extends BaseListVM<MainTitle> {
       MainTitle(VIEW_PAGER)
     ]);
   }
+
+  @override
+  bool onBackPressed() => false;
 }
 
 class MainTitle {
