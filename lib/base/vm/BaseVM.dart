@@ -30,17 +30,17 @@ abstract class BaseVM {
 
   /// onCreate生命周期
   void onCreate() {
-    // Log.d("$_className: onCreate...");
+    Log.d("$_className: onCreate...");
   }
 
   /// onResume生命周期
   void onResume() {
-    // Log.d("$_className: onResume...");
+    Log.d("$_className: onResume...");
   }
 
   /// onPause生命周期
   void onPause() {
-    // Log.d("$_className: onPause...");
+    Log.d("$_className: onPause...");
   }
 
   /// onDestroy生命周期
@@ -48,7 +48,7 @@ abstract class BaseVM {
     _context = null;
     onShowLoading = null;
     onDismissLoading = null;
-    // Log.d("$_className: onDestroy...");
+    Log.d("$_className: onDestroy...");
   }
 
   /// 返回按钮点击
@@ -95,18 +95,23 @@ abstract class BaseVM {
     int? cacheTime,
     String? customCacheKey,
   }) {
+    // 如果没有传入取消标识则自动创建一个
+    cancelToken = cancelToken ?? CancelToken();
+
+    // 并将取消标识放到列表中统一管理
+    _cancelTokenList.add(cancelToken);
+
+    // 根据需要展示loading弹框
     if (isNeedLoading) {
       showLoading(loadingTxt: loadingTxt, cancelable: isLoadingCancelable);
     }
 
-    cancelToken = cancelToken ?? CancelToken();
-
-    _cancelTokenList.add(cancelToken);
-
+    // 调用接口请求方法
     HttpManager.getInstance().request(
         path: path,
         onFromJson: onFromJson,
         onSuccess: (T? data) {
+          // 接口请求成功
           if (!isFinishing()) {
             if (isNeedLoading) {
               dismissLoading();
@@ -117,6 +122,7 @@ abstract class BaseVM {
           }
         },
         onFailed: (CstHttpException e) {
+          // 接口请求失败
           if (!isFinishing()) {
             if (isNeedLoading) {
               dismissLoading();
