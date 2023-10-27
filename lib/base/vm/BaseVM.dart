@@ -28,18 +28,22 @@ abstract class BaseVM {
   // 上下文
   BuildContext? get context => _context;
 
+  /// onCreate生命周期
   void onCreate() {
     Log.d("$_className: onCreate...");
   }
 
+  /// onResume生命周期
   void onResume() {
     Log.d("$_className: onResume...");
   }
 
+  /// onPause生命周期
   void onPause() {
     Log.d("$_className: onPause...");
   }
 
+  /// onDestroy生命周期
   void onDestroy() {
     _context = null;
     onShowLoading = null;
@@ -50,7 +54,7 @@ abstract class BaseVM {
   /// 返回按钮点击
   bool onBackPressed() {
     if (_context != null) {
-      Navigator.pop(_context!);
+      _context?.pop();
       return true;
     }
     return false;

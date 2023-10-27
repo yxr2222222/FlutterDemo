@@ -21,6 +21,7 @@ abstract class BasePageListVM<T, E> extends BaseListVM<T> {
     firstLoad();
   }
 
+  /// 首次加载，主要用于进入页面时即触发数据加载，且不想要下拉刷新的动作
   void firstLoad(
       {bool? multiStateLoading, bool? dialogLoading, String? loadingTxt}) {
     _page = initPage();
@@ -47,22 +48,27 @@ abstract class BasePageListVM<T, E> extends BaseListVM<T> {
     });
   }
 
+  /// 刷新操作，主要时给EasyRefresher绑定
   void onRefresh() async {
     _refreshLoadData(true);
   }
 
+  /// 加载更多操作，主要时给EasyRefresher绑定
   void onLoadMore() async {
     _refreshLoadData(false);
   }
 
+  /// 开始的页码，默认为0，子类可override重新定义
   int initPage() {
     return 0;
   }
 
+  /// 每页数量，默认为0，子类可override重新定义
   int getPageSize() {
     return 10;
   }
 
+  /// 快速构建EasyRefresh + ListView
   EasyRefresh listRefreshBuilder(
       {required ChildItemBuilder<T> childItemBuilder,
       OnItemClick<T>? onItemClick,
@@ -82,6 +88,7 @@ abstract class BasePageListVM<T, E> extends BaseListVM<T> {
             ));
   }
 
+  /// 快速构建EasyRefresh + GridView
   EasyRefresh gridRefreshBuilder(
       {required ChildItemBuilder<T> childItemBuilder,
       required SliverGridDelegate gridDelegate,
@@ -103,6 +110,7 @@ abstract class BasePageListVM<T, E> extends BaseListVM<T> {
             ));
   }
 
+  /// 下拉刷新/加载更多的事件处理
   void _refreshLoadData(bool isRefresh) async {
     if (_isNotLoading()) {
       if (isRefresh) {
@@ -114,6 +122,7 @@ abstract class BasePageListVM<T, E> extends BaseListVM<T> {
     }
   }
 
+  /// 处理loadData获取的数据
   void _checkUpdateResp(BaseResp<E> resp, bool isRefresh,
       {bool first = false, bool? multiStateLoading, bool? dialogLoading}) {
     if (!isFinishing()) {
@@ -132,6 +141,7 @@ abstract class BasePageListVM<T, E> extends BaseListVM<T> {
     }
   }
 
+  /// 下拉刷新/加载更多操作成功
   void _refreshLoadSuccess(bool isRefresh, bool hasMore, List<T> itemList,
       {bool first = false, bool? multiStateLoading, bool? dialogLoading}) {
     if (!isFinishing()) {
@@ -158,6 +168,7 @@ abstract class BasePageListVM<T, E> extends BaseListVM<T> {
     }
   }
 
+  /// 下拉刷新/加载更多操作失败
   void _refreshLoadFailed(bool isRefresh,
       {bool first = false, bool? multiStateLoading, bool? dialogLoading}) {
     if (!isFinishing()) {
@@ -178,13 +189,16 @@ abstract class BasePageListVM<T, E> extends BaseListVM<T> {
     }
   }
 
+  /// 是否正则加载中
   bool _isNotLoading() {
     return !_loading;
   }
 
+  /// 加载数据的具体过程，抽象方法，由子类具体实现
   @protected
   Future<BaseResp<E>> loadData(int page, int pageSize);
 
+  /// 数据加载成功之后构建本次加载的列表数据，抽象方法，由子类具体实现
   @protected
   PageResult<T>? createPageResult(BaseResp<E> resp);
 }

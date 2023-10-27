@@ -15,7 +15,7 @@ abstract class BaseWidget<VM extends BaseVM> extends StatefulWidget {
 }
 
 abstract class BaseWidgetState<VM extends BaseVM, W extends BaseWidget<VM>>
-    extends State<W> {
+    extends State<W> with AutomaticKeepAliveClientMixin {
   late VM _viewModel;
 
   VM get viewModel => _viewModel;
@@ -57,6 +57,7 @@ abstract class BaseWidgetState<VM extends BaseVM, W extends BaseWidget<VM>>
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     this._context = context;
     return VisibilityDetector(
         key: UniqueKey(),
@@ -72,12 +73,15 @@ abstract class BaseWidgetState<VM extends BaseVM, W extends BaseWidget<VM>>
   }
 
   @override
+  bool get wantKeepAlive => false;
+
+  @override
   void dispose() {
     _lifecycleListener?.dispose();
-    viewModel.onDestroy();
-
     dismissLoading();
 
+    _onPause(false);
+    viewModel.onDestroy();
     onDestroy();
     super.dispose();
   }

@@ -6,6 +6,7 @@ import 'package:flutter_demo/base/model/PermissionReq.dart';
 import 'package:flutter_demo/base/util/GetBuilderUtil.dart';
 import 'package:flutter_demo/base/vm/BaseListVM.dart';
 import 'package:flutter_demo/base/widget/BaseMultiStateWidget.dart';
+import 'package:flutter_demo/tab/ViewPagerTest.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'base/http/HttpManager.dart';
@@ -58,6 +59,8 @@ class _MyHomePageState
           }));
         } else if (_MyHomePageVM.REFRESH == itemWidget.item.title) {
           context.push(RefreshLoadTestWidget());
+        } else if (_MyHomePageVM.VIEW_PAGER == itemWidget.item.title) {
+          context.push(ViewPagerTest());
         }
 
         var controller = itemWidget.getController(itemWidget.item.background);
@@ -91,6 +94,7 @@ class _MyHomePageVM extends BaseListVM<MainTitle> {
   static const String API = "API请求示例";
   static const String REFRESH = "下拉刷新/上拉加载";
   static const String PERMISSION = "权限申请";
+  static const String VIEW_PAGER = "ViewPager";
 
   @override
   void onCreate() {
@@ -98,9 +102,12 @@ class _MyHomePageVM extends BaseListVM<MainTitle> {
 
     appbarController.appbarTitle = "FlutterDemo";
 
-    refreshData(
-        isClear: true,
-        dataList: [MainTitle(API), MainTitle(REFRESH), MainTitle(PERMISSION)]);
+    refreshData(isClear: true, dataList: [
+      MainTitle(API),
+      MainTitle(REFRESH),
+      MainTitle(PERMISSION),
+      MainTitle(VIEW_PAGER)
+    ]);
   }
 }
 

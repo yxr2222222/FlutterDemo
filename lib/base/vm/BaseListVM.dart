@@ -9,6 +9,7 @@ abstract class BaseListVM<T> extends BaseMultiStateVM {
   final SimpleGetxController<List<T>> itemListController =
       SimpleGetxController([]);
 
+  /// 刷新列表数据
   void refreshData({bool isClear = true, List<T>? dataList}) {
     var itemList = itemListController.data ?? [];
     if (isClear) {
@@ -19,6 +20,7 @@ abstract class BaseListVM<T> extends BaseMultiStateVM {
     itemListController.data = itemList;
   }
 
+  /// 快速构建ListView
   Widget listBuilder(
       {required ChildItemBuilder<T> childItemBuilder,
       OnItemClick<T>? onItemClick}) {
@@ -36,6 +38,7 @@ abstract class BaseListVM<T> extends BaseMultiStateVM {
         init: itemListController);
   }
 
+  /// 快速构建GridView
   Widget gridBuilder(
       {required SliverGridDelegate gridDelegate,
       required ChildItemBuilder<T> childItemBuilder,
@@ -56,8 +59,10 @@ abstract class BaseListVM<T> extends BaseMultiStateVM {
   }
 }
 
+/// ListView/GridView item构建方法回调
 typedef ChildItemBuilder<T> = Widget Function(
     BaseItemWidget<T> itemWidget, BuildContext context);
 
+/// ListView/GridView item被点击方法回调
 typedef OnItemClick<T> = void Function(
     BaseItemWidget<T> itemWidget, BuildContext context);
