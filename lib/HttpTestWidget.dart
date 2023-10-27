@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_demo/base/model/SimpleGetxController.dart';
+import 'package:flutter_demo/base/util/GetBuilderUtil.dart';
 import 'package:flutter_demo/base/widget/BaseMultiStateWidget.dart';
 
 import 'base/vm/BaseMultiStateVM.dart';
@@ -33,19 +35,20 @@ class _HttpTestWidgetState
               child: const Text('检查更新',
                   style: TextStyle(fontSize: 20, color: Colors.white))),
         ),
-        Text(
-          '${viewModel.appUpdate?.toJson()}',
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
+        GetBuilderUtil.builder(
+            (controller) => Text(
+                  '${viewModel.appUpdateController.data?.toJson()}',
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+            init: viewModel.appUpdateController),
       ],
     );
   }
 }
 
 class _HttpTestVM extends BaseMultiStateVM {
-  AppUpdate? _appUpdate;
-
-  AppUpdate? get appUpdate => _appUpdate;
+  final SimpleGetxController<AppUpdate> appUpdateController =
+      SimpleGetxController();
 
   @override
   void onCreate() {
@@ -60,7 +63,7 @@ class _HttpTestVM extends BaseMultiStateVM {
 
   /// 请求应用更新信息
   void requestAppUpdate() {
-    request<AppUpdate>(
+    requestWithState<AppUpdate>(
         path: "/pub/appUpdate/getAppUpdate",
         loadingTxt: "loading...",
         params: {"os": "0", "machine": "afhkeagjhakgaekl", "version": "1.0.0"},
@@ -68,9 +71,8 @@ class _HttpTestVM extends BaseMultiStateVM {
           return AppUpdate.fromJson(json['data']);
         },
         onSuccess: (AppUpdate? data) {
-          _appUpdate = data;
-          appbarTitle = data?.title ?? "未知标题";
-          notifyListeners();
+          appUpdateController.data = data;
+          appbarController.appbarTitle = data?.title ?? "未知标题";
         });
   }
 }

@@ -1,52 +1,58 @@
+import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:flutter_demo/base/model/BaseResp.dart';
 
-import '../model/ItemBinding.dart';
 import '../model/PageResult.dart';
 import 'BaseListVM.dart';
 
-abstract class BasePageListVM<T, IB extends ItemBinding<T>>
-    extends BaseListVM<T, IB> {
-  final RefreshController refreshController;
+abstract class BasePageListVM<T, E> extends BaseListVM<T> {
+  final EasyRefreshController refreshController = EasyRefreshController(
+      controlFinishRefresh: true, controlFinishLoad: true);
 
-  BasePageListVM({required this.refreshController});
+  bool _loading = false;
 
   @protected
   int _page = 0;
 
   int get page => _page;
 
-  void onRefresh() async {
-    if (_isNotLoading()) {
-      _page = initPage();
-      var pageResult = await loadData(_page, getPageSize());
+  @override
+  void onRetry() {
+    firstLoad();
+  }
 
-      if (!pageResult.success) {
-        refreshController.refreshFailed();
-      } else {
-        refreshController.refreshCompleted();
-      }
-
-      refreshData(isClear: true, dataList: pageResult.itemList);
+  void firstLoad(
+      {bool? multiStateLoading, bool? dialogLoading, String? loadingTxt}) {
+    _page = initPage();
+    if (multiStateLoading == true) {
+      showLoadingState(loadingTxt: loadingTxt);
     }
+    if (dialogLoading == true) {
+      showLoading(loadingTxt: loadingTxt);
+    }
+    loadData(_page, getPageSize()).then(
+        (resp) => {
+              _checkUpdateResp(resp, true,
+                  first: true,
+                  multiStateLoading: multiStateLoading,
+                  dialogLoading: dialogLoading)
+            }, onError: (e) {
+      _refreshLoadFailed(true,
+          first: true,
+          multiStateLoading: multiStateLoading,
+          dialogLoading: dialogLoading);
+      if (!isFinishing()) {}
+    }).catchError((e) {
+      return e;
+    });
+  }
+
+  void onRefresh() async {
+    _refreshLoadData(true);
   }
 
   void onLoadMore() async {
-    if (_isNotLoading()) {
-      _page++;
-      var pageResult = await loadData(_page, getPageSize());
-
-      if (pageResult.success) {
-        refreshController.loadFailed();
-        if (!pageResult.hasMore) {
-          refreshController.loadNoData();
-        }
-      } else {
-        refreshController.loadComplete();
-      }
-
-      refreshData(isClear: false, dataList: pageResult.itemList);
-    }
+    _refreshLoadData(false);
   }
 
   int initPage() {
@@ -57,9 +63,128 @@ abstract class BasePageListVM<T, IB extends ItemBinding<T>>
     return 10;
   }
 
-  bool _isNotLoading() {
-    return !refreshController.isLoading && !refreshController.isRefresh;
+  EasyRefresh listRefreshBuilder(
+      {required ChildItemBuilder<T> childItemBuilder,
+      OnItemClick<T>? onItemClick,
+      Widget? listWidget}) {
+    return EasyRefresh(
+        controller: refreshController,
+        header: const ClassicHeader(),
+        footer: const ClassicFooter(),
+        canRefreshAfterNoMore: true,
+        resetAfterRefresh: true,
+        onRefresh: () => onRefresh(),
+        onLoad: () => onLoadMore(),
+        child: listWidget ??
+            listBuilder(
+              childItemBuilder: childItemBuilder,
+              onItemClick: onItemClick,
+            ));
   }
 
-  Future<PageResult<T, IB>> loadData(int page, int pageSize);
+  EasyRefresh gridRefreshBuilder(
+      {required ChildItemBuilder<T> childItemBuilder,
+      required SliverGridDelegate gridDelegate,
+      OnItemClick<T>? onItemClick,
+      Widget? gridWidget}) {
+    return EasyRefresh(
+        controller: refreshController,
+        header: const ClassicHeader(),
+        footer: const ClassicFooter(),
+        canRefreshAfterNoMore: true,
+        resetAfterRefresh: true,
+        onRefresh: () => onRefresh(),
+        onLoad: () => onLoadMore(),
+        child: gridWidget ??
+            gridBuilder(
+              gridDelegate: gridDelegate,
+              childItemBuilder: childItemBuilder,
+              onItemClick: onItemClick,
+            ));
+  }
+
+  void _refreshLoadData(bool isRefresh) async {
+    if (_isNotLoading()) {
+      if (isRefresh) {
+        _page = initPage();
+      }
+
+      var resp = await loadData(_page, getPageSize());
+      _checkUpdateResp(resp, isRefresh);
+    }
+  }
+
+  void _checkUpdateResp(BaseResp<E> resp, bool isRefresh,
+      {bool first = false, bool? multiStateLoading, bool? dialogLoading}) {
+    if (!isFinishing()) {
+      if (!resp.isSuccess) {
+        _refreshLoadFailed(isRefresh);
+      } else {
+        var pageResult = createPageResult(resp);
+        var itemList = pageResult?.itemList ?? <T>[];
+        var hasMore = pageResult?.hasMore ?? itemList.isNotEmpty;
+
+        _refreshLoadSuccess(isRefresh, hasMore, itemList,
+            first: first,
+            multiStateLoading: multiStateLoading,
+            dialogLoading: dialogLoading);
+      }
+    }
+  }
+
+  void _refreshLoadSuccess(bool isRefresh, bool hasMore, List<T> itemList,
+      {bool first = false, bool? multiStateLoading, bool? dialogLoading}) {
+    if (!isFinishing()) {
+      _page++;
+      if (isRefresh) {
+        refreshController.finishRefresh();
+        refreshController.resetFooter();
+      } else if (hasMore) {
+        refreshController.finishLoad();
+      } else {
+        refreshController.finishLoad(IndicatorResult.noMore);
+      }
+      refreshData(isClear: isRefresh, dataList: itemList);
+
+      if (first) {
+        if (multiStateLoading == true) {
+          showContentState();
+        }
+        if (dialogLoading == true) {
+          dismissLoading();
+        }
+      }
+      _loading = false;
+    }
+  }
+
+  void _refreshLoadFailed(bool isRefresh,
+      {bool first = false, bool? multiStateLoading, bool? dialogLoading}) {
+    if (!isFinishing()) {
+      if (isRefresh) {
+        refreshController.finishRefresh(IndicatorResult.fail);
+      } else {
+        refreshController.finishLoad(IndicatorResult.fail);
+      }
+      if (first) {
+        if (multiStateLoading == true) {
+          showErrorState();
+        }
+        if (dialogLoading == true) {
+          dismissLoading();
+        }
+      }
+      _loading = false;
+    }
+  }
+
+  bool _isNotLoading() {
+    return !_loading;
+  }
+
+  @protected
+  Future<BaseResp<E>> loadData(int page, int pageSize);
+
+  @protected
+  PageResult<T>? createPageResult(BaseResp<E> resp);
 }

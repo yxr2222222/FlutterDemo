@@ -165,21 +165,25 @@ class HttpManager {
     int? cacheTime,
     String? customCacheKey,
   }) async {
-    var future = _requestWithFuture<dynamic>(
-        path: path,
-        reqType: reqType,
-        params: params,
-        options: options,
-        body: body,
-        cancelToken: cancelToken,
-        respConfig: respConfig,
-        cacheMode: cacheMode,
-        cacheTime: cacheTime,
-        customCacheKey: customCacheKey);
+    try {
+      var future = _requestWithFuture<dynamic>(
+          path: path,
+          reqType: reqType,
+          params: params,
+          options: options,
+          body: body,
+          cancelToken: cancelToken,
+          respConfig: respConfig,
+          cacheMode: cacheMode,
+          cacheTime: cacheTime,
+          customCacheKey: customCacheKey);
 
-    Response response = await future;
-    return _parseResponseThenCallback(
-        response, respConfig, onFromJson, null, null);
+      Response response = await future;
+      return _parseResponseThenCallback(
+          response, respConfig, onFromJson, null, null);
+    } on Exception catch (e) {
+      return BaseResp(false, error: CstHttpException.createHttpException(e));
+    }
   }
 
   Future<Response<T>> _requestWithFuture<T>({

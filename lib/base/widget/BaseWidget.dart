@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_demo/base/extension/BuildContextExtension.dart';
 import 'package:flutter_demo/base/vm/BaseVM.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:provider/provider.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import 'DefaultLoadingDialog.dart';
@@ -25,7 +24,7 @@ abstract class BaseWidgetState<VM extends BaseVM, W extends BaseWidget<VM>>
   BuildContext? _currLoading;
 
   bool _created = false;
-  bool _Resumed = false;
+  bool _resumed = false;
   AppLifecycleListener? _lifecycleListener;
 
   @override
@@ -61,13 +60,7 @@ abstract class BaseWidgetState<VM extends BaseVM, W extends BaseWidget<VM>>
     this._context = context;
     return VisibilityDetector(
         key: UniqueKey(),
-        child: ChangeNotifierProvider(
-          create: (BuildContext context) => viewModel,
-          child: Consumer<VM>(
-            builder: (BuildContext context, VM viewModel, Widget? child) =>
-                createChild(context, viewModel),
-          ),
-        ),
+        child: createChild(context, viewModel),
         onVisibilityChanged: (visibilityInfo) {
           var visiblePercentage = visibilityInfo.visibleFraction * 100;
           if (visiblePercentage >= 80) {
@@ -115,9 +108,9 @@ abstract class BaseWidgetState<VM extends BaseVM, W extends BaseWidget<VM>>
   }
 
   void _onResume(bool isFromLifecycle) {
-    if (_created && !_Resumed) {
+    if (_created && !_resumed) {
       if (!isFromLifecycle || ModalRoute.of(context)?.isCurrent == true) {
-        _Resumed = true;
+        _resumed = true;
         onResume();
         viewModel.onResume();
       }
@@ -125,9 +118,9 @@ abstract class BaseWidgetState<VM extends BaseVM, W extends BaseWidget<VM>>
   }
 
   void _onPause(bool isFromLifecycle) {
-    if (_created && _Resumed) {
+    if (_created && _resumed) {
       if (!isFromLifecycle || ModalRoute.of(context)?.isCurrent == true) {
-        _Resumed = false;
+        _resumed = false;
         onPause();
         viewModel.onPause();
       }

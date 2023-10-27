@@ -1,18 +1,63 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_demo/base/vm/BaseMultiStateVM.dart';
 
-import '../model/ItemBinding.dart';
+import '../model/SimpleGetxController.dart';
+import '../util/GetBuilderUtil.dart';
+import '../widget/BaseItemWidget.dart';
 
-abstract class BaseListVM<T, IB extends ItemBinding<T>>
-    extends BaseMultiStateVM {
-  final List<IB> _itemBindingList = [];
+abstract class BaseListVM<T> extends BaseMultiStateVM {
+  final SimpleGetxController<List<T>> itemListController =
+      SimpleGetxController([]);
 
-  List<IB> get itemBindingList => _itemBindingList;
-
-  void refreshData({bool isClear = true, List<IB>? dataList}) {
+  void refreshData({bool isClear = true, List<T>? dataList}) {
+    var itemList = itemListController.data ?? [];
     if (isClear) {
-      _itemBindingList.clear();
+      itemList = [];
     }
-    _itemBindingList.addAll(dataList ?? []);
-    notifyListeners();
+    itemList = List.from(itemList);
+    itemList.addAll(dataList ?? []);
+    itemListController.data = itemList;
+  }
+
+  Widget listBuilder(
+      {required ChildItemBuilder<T> childItemBuilder,
+      OnItemClick<T>? onItemClick}) {
+    return GetBuilderUtil.builder<SimpleGetxController<List<T>>>(
+        (controller) => ListView.builder(
+            itemCount: controller.dataNotNull.length,
+            itemBuilder: (context, index) {
+              T item = controller.dataNotNull[index];
+              return BaseItemWidget(
+                  childItemBuilder: childItemBuilder,
+                  item: item,
+                  index: index,
+                  onItemClick: onItemClick);
+            }),
+        init: itemListController);
+  }
+
+  Widget gridBuilder(
+      {required SliverGridDelegate gridDelegate,
+      required ChildItemBuilder<T> childItemBuilder,
+      OnItemClick<T>? onItemClick}) {
+    return GetBuilderUtil.builder<SimpleGetxController<List<T>>>(
+        (controller) => GridView.builder(
+            gridDelegate: gridDelegate,
+            itemCount: controller.dataNotNull.length,
+            itemBuilder: (context, index) {
+              T item = controller.dataNotNull[index];
+              return BaseItemWidget(
+                  childItemBuilder: childItemBuilder,
+                  item: item,
+                  index: index,
+                  onItemClick: onItemClick);
+            }),
+        init: itemListController);
   }
 }
+
+typedef ChildItemBuilder<T> = Widget Function(
+    BaseItemWidget<T> itemWidget, BuildContext context);
+
+typedef OnItemClick<T> = void Function(
+    BaseItemWidget<T> itemWidget, BuildContext context);

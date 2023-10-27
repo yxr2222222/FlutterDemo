@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_demo/base/model/AppbarController.dart';
+import 'package:flutter_demo/base/model/ViewStateController.dart';
 import 'package:flutter_demo/base/model/em/ViewState.dart';
 import 'package:flutter_demo/base/widget/BaseWidget.dart';
-import 'package:provider/provider.dart';
 
+import '../util/GetBuilderUtil.dart';
 import '../vm/BaseMultiStateVM.dart';
 
 abstract class BaseMultiStateWidget<VM extends BaseMultiStateVM>
@@ -16,56 +18,62 @@ abstract class BaseMultiStateWidgetState<VM extends BaseMultiStateVM,
 
   @override
   Widget createChild(BuildContext context, VM viewModel) => Scaffold(
-      appBar: createAppBar(context, viewModel),
+      appBar: PreferredSize(
+        preferredSize: Size(MediaQuery.of(context).size.width, 56.0),
+        child: createAppBar(context, viewModel),
+      ),
       body: Container(
           width: double.infinity,
           height: double.infinity,
           decoration: const BoxDecoration(color: Color(0xfff2f2f2)),
-          child: _buildWidget(context, viewModel)));
+          child: GetBuilderUtil.builder(
+              (controller) => _buildWidget(context, viewModel, controller),
+              init: viewModel.stateController)));
 
   ///根据不同状态来显示不同的视图
-  Widget _buildWidget(BuildContext context, VM viewModel) {
-    switch (viewModel.viewState.viewState) {
+  Widget _buildWidget(
+      BuildContext context, VM viewModel, ViewStateController controller) {
+    switch (controller.viewState) {
       case ViewState.error:
-        _errorView ??= createErrorView(context, viewModel);
+        _errorView ??= createErrorView(context, viewModel, controller);
         return _errorView!;
       case ViewState.loading:
-        _loadingView ??= createLoadingView(context, viewModel);
+        _loadingView ??= createLoadingView(context, viewModel, controller);
         return _loadingView!;
       case ViewState.empty:
-        _emptyView ??= createEmptyView(context, viewModel);
+        _emptyView ??= createEmptyView(context, viewModel, controller);
         return _emptyView!;
       default:
-        _contentView ??= Consumer<VM>(
-          builder: (BuildContext context, VM viewModel, Widget? child) =>
-              createContentView(context, viewModel),
-        );
+        _contentView ??= createContentView(context, viewModel);
         return _contentView!;
     }
   }
 
   /// 创建AppBar控件，子类可override自定义
-  AppBar? createAppBar(BuildContext context, VM viewModel) {
-    return AppBar(
-      leading: GestureDetector(
-        onTap: () {
-          viewModel.onBackPressed();
-        },
-        child: SizedBox(
-            width: 56,
-            height: 48,
-            child: Icon(viewModel.appbarBackIcon, size: 24)),
-      ),
-      backgroundColor: viewModel.appbarBackgroundColor,
-      title: Text(viewModel.appbarTitle ?? ""),
-      centerTitle: true,
-      titleTextStyle: viewModel.appbarTitleStyle,
-      actions: viewModel.appbarActions,
-    );
+  Widget createAppBar(BuildContext context, VM viewModel) {
+    return GetBuilderUtil.builder<AppbarController>(
+        (controller) => AppBar(
+              leading: GestureDetector(
+                onTap: () {
+                  viewModel.onBackPressed();
+                },
+                child: SizedBox(
+                    width: 56,
+                    height: 48,
+                    child: Icon(controller.appbarBackIcon, size: 24)),
+              ),
+              backgroundColor: controller.appbarBackgroundColor,
+              title: Text(controller.appbarTitle ?? ""),
+              centerTitle: true,
+              titleTextStyle: controller.appbarTitleStyle,
+              actions: controller.appbarActions,
+            ),
+        init: viewModel.appbarController);
   }
 
   /// 创建Loading视图，子类可override自定义
-  Widget createLoadingView(BuildContext context, VM viewModel) {
+  Widget createLoadingView(
+      BuildContext context, VM viewModel, ViewStateController controller) {
     return SizedBox(
         width: double.infinity,
         height: double.infinity,
@@ -84,11 +92,11 @@ abstract class BaseMultiStateWidgetState<VM extends BaseMultiStateVM,
                             height: 32,
                             child: CircularProgressIndicator()),
                         Visibility(
-                            visible: viewModel.viewState.hintTxt != null,
+                            visible: controller.hintTxt != null,
                             child: Container(
                               margin: const EdgeInsets.only(top: 16),
                               child: Text(
-                                viewModel.viewState.hintTxt ?? "",
+                                controller.hintTxt ?? "",
                                 style: const TextStyle(
                                     fontSize: 14, color: Color(0xff5c5c5c)),
                               ),
@@ -100,7 +108,8 @@ abstract class BaseMultiStateWidgetState<VM extends BaseMultiStateVM,
   }
 
   /// 创建错误视图，子类可override自定义
-  Widget createErrorView(BuildContext context, VM viewModel) {
+  Widget createErrorView(
+      BuildContext context, VM viewModel, ViewStateController controller) {
     return SizedBox(
       width: double.infinity,
       height: double.infinity,
@@ -116,7 +125,7 @@ abstract class BaseMultiStateWidgetState<VM extends BaseMultiStateVM,
           Container(
             margin: const EdgeInsets.only(top: 24),
             child: Text(
-              viewModel.viewState.hintTxt ?? "加载失败，试试刷新页面",
+              controller.hintTxt ?? "加载失败，试试刷新页面",
               style: const TextStyle(fontSize: 14, color: Color(0xff999999)),
             ),
           ),
@@ -133,7 +142,7 @@ abstract class BaseMultiStateWidgetState<VM extends BaseMultiStateVM,
                     borderRadius: BorderRadius.all(Radius.circular(24))),
               ),
               child: Text(
-                viewModel.viewState.retryTxt ?? "重新加载",
+                controller.retryTxt ?? "重新加载",
                 style: const TextStyle(fontSize: 14, color: Colors.white),
               ),
             ),
@@ -144,7 +153,8 @@ abstract class BaseMultiStateWidgetState<VM extends BaseMultiStateVM,
   }
 
   /// 创建空视图，子类可override自定义
-  Widget createEmptyView(BuildContext context, VM viewModel) {
+  Widget createEmptyView(
+      BuildContext context, VM viewModel, ViewStateController controller) {
     return SizedBox(
       width: double.infinity,
       height: double.infinity,
@@ -160,7 +170,7 @@ abstract class BaseMultiStateWidgetState<VM extends BaseMultiStateVM,
           Container(
             margin: const EdgeInsets.only(top: 16),
             child: Text(
-              viewModel.viewState.hintTxt ?? "未获取到相关内容～",
+              controller.hintTxt ?? "未获取到相关内容～",
               style: const TextStyle(fontSize: 14, color: Color(0xff999999)),
             ),
           ),
@@ -177,7 +187,7 @@ abstract class BaseMultiStateWidgetState<VM extends BaseMultiStateVM,
                     borderRadius: BorderRadius.all(Radius.circular(24))),
               ),
               child: Text(
-                viewModel.viewState.retryTxt ?? "重新加载",
+                controller.retryTxt ?? "重新加载",
                 style: const TextStyle(fontSize: 14, color: Colors.white),
               ),
             ),

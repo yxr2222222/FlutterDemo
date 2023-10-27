@@ -1,9 +1,6 @@
-import 'ItemBinding.dart';
+class PageResult<T> {
+  final bool? hasMore;
+  final List<T> itemList;
 
-class PageResult<T, IB extends ItemBinding<T>> {
-  final bool success;
-  final bool hasMore;
-  final List<IB> itemList;
-
-  PageResult(this.success, this.hasMore, this.itemList);
+  PageResult(this.itemList, {this.hasMore});
 }

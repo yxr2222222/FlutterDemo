@@ -4,7 +4,7 @@ import 'package:json_annotation/json_annotation.dart';
 part 'app_update.g.dart';
 
 @JsonSerializable()
-class AppUpdate extends ChangeNotifier {
+class AppUpdate {
   @JsonKey(defaultValue: '')
   final String title;
   @JsonKey(defaultValue: '')

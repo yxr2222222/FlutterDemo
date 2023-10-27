@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_demo/base/extension/BuildContextExtension.dart';
 import 'package:flutter_demo/base/util/Log.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -12,7 +13,7 @@ import '../model/BaseResp.dart';
 import '../model/PermissionReq.dart';
 import '../util/PermissionUtil.dart';
 
-abstract class BaseVM extends ChangeNotifier {
+abstract class BaseVM {
   String? _className;
   BuildContext? _context;
   final List<CancelToken> _cancelTokenList = [];
@@ -24,29 +25,8 @@ abstract class BaseVM extends ChangeNotifier {
     _className = runtimeType.toString();
   }
 
-  // 是否已经被销毁
-  bool _disposed = false;
-
-  bool get isDisposed => _disposed;
-
   // 上下文
   BuildContext? get context => _context;
-
-  @override
-  void notifyListeners() {
-    if (!_disposed) {
-      super.notifyListeners();
-    }
-  }
-
-  @override
-  void dispose() {
-    Log.d("$_className: dispose...");
-    if (!_disposed) {
-      cancelRequests();
-      super.dispose();
-    }
-  }
 
   void onCreate() {
     Log.d("$_className: onCreate...");
@@ -61,11 +41,9 @@ abstract class BaseVM extends ChangeNotifier {
   }
 
   void onDestroy() {
-    _disposed = true;
     _context = null;
     onShowLoading = null;
     onDismissLoading = null;
-    dispose();
     Log.d("$_className: onDestroy...");
   }
 
@@ -125,7 +103,7 @@ abstract class BaseVM extends ChangeNotifier {
         path: path,
         onFromJson: onFromJson,
         onSuccess: (T? data) {
-          if (!_disposed) {
+          if (!isFinishing()) {
             if (isNeedLoading) {
               dismissLoading();
             }
@@ -135,7 +113,7 @@ abstract class BaseVM extends ChangeNotifier {
           }
         },
         onFailed: (CstHttpException e) {
-          if (!_disposed) {
+          if (!isFinishing()) {
             if (isNeedLoading) {
               dismissLoading();
             }
@@ -225,6 +203,10 @@ abstract class BaseVM extends ChangeNotifier {
     } catch (e) {
       Log.d(e.toString());
     }
+  }
+
+  bool isFinishing() {
+    return _context == null || !_context!.isUseful();
   }
 }
 
