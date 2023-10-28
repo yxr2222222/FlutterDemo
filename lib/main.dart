@@ -12,8 +12,11 @@ import 'base/http/HttpManager.dart';
 import 'base/http/model/BaseRespConfig.dart';
 
 void main() {
-  HttpManager.getInstance().init("http://192.168.1.130:8089/", true,
-      BaseRespConfig(filedCode: "code", filedMsg: "message"));
+  /// 初始化网络请求配置
+  HttpManager.getInstance().init(
+      baseUrl: "http://192.168.2.42:8089/",
+      debug: true,
+      respConfig: BaseRespConfig(filedCode: "code", filedMsg: "message"));
   runApp(const MyApp());
 }
 

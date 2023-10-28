@@ -40,15 +40,18 @@ class HttpManager {
   }
 
   /// 初始化
-  void init(String baseUrl, bool debug, BaseRespConfig respConfig,
-      [int connectTimeout = 15000,
+  void init(
+      {required String baseUrl,
+      bool debug = false,
+      BaseRespConfig? respConfig,
+      int connectTimeout = 15000,
       int receiveTimeout = 15000,
       Map<String, dynamic>? publicHeaders,
       Map<String, dynamic>? publicQueryParams,
       CacheConfig? cacheConfig,
-      List<Interceptor>? interceptors]) {
+      List<Interceptor>? interceptors}) {
     _debug = debug;
-    _respConfig = respConfig;
+    _respConfig = respConfig ?? BaseRespConfig();
     publicHeaders?.forEach((key, value) {
       _publicHeaders[key] = value;
     });
@@ -122,6 +125,7 @@ class HttpManager {
     return _respConfig;
   }
 
+  /// 回调方式调用的网络请求
   void request<T>({
     required String path,
     required OnFromJson<T>? onFromJson,
@@ -137,21 +141,27 @@ class HttpManager {
     int? cacheTime,
     String? customCacheKey,
   }) {
-    var future = _requestWithFuture<dynamic>(
-        path: path,
-        reqType: reqType,
-        params: params,
-        options: options,
-        body: body,
-        cancelToken: cancelToken,
-        respConfig: respConfig,
-        cacheMode: cacheMode,
-        cacheTime: cacheTime,
-        customCacheKey: customCacheKey);
-
-    _callFuture(future, respConfig, onFromJson, onSuccess, onFailed);
+    requestWithFuture<T>(
+            path: path,
+            onFromJson: onFromJson,
+            reqType: reqType,
+            params: params,
+            options: options,
+            body: body,
+            cancelToken: cancelToken,
+            respConfig: respConfig,
+            cacheMode: cacheMode,
+            cacheTime: cacheTime,
+            customCacheKey: customCacheKey)
+        .then((resp) => {_checkSuccessFailed(resp, onSuccess, onFailed)},
+            onError: (e) {
+      _onFailed(onFailed, CstHttpException.createHttpException(e));
+    }).catchError((e) {
+      return e;
+    });
   }
 
+  /// 需要异步调用的网络请求
   Future<BaseResp<T>> requestWithFuture<T>({
     required String path,
     required OnFromJson<T>? onFromJson,
@@ -166,79 +176,52 @@ class HttpManager {
     String? customCacheKey,
   }) async {
     try {
-      var future = _requestWithFuture<dynamic>(
-          path: path,
-          reqType: reqType,
-          params: params,
-          options: options,
-          body: body,
-          cancelToken: cancelToken,
-          respConfig: respConfig,
-          cacheMode: cacheMode,
-          cacheTime: cacheTime,
-          customCacheKey: customCacheKey);
+      Options option =
+          _copyOptions(options, cacheMode, cacheTime, customCacheKey);
+
+      Future<Response<dynamic>> future;
+      switch (reqType) {
+        case ReqType.post:
+          {
+            future = _dio.post(path,
+                data: body,
+                queryParameters: params,
+                options: option,
+                cancelToken: cancelToken);
+            break;
+          }
+        case ReqType.put:
+          {
+            future = _dio.put(path,
+                data: body,
+                queryParameters: params,
+                options: option,
+                cancelToken: cancelToken);
+            break;
+          }
+        case ReqType.delete:
+          {
+            future = _dio.delete(path,
+                data: body,
+                queryParameters: params,
+                options: option,
+                cancelToken: cancelToken);
+            break;
+          }
+        default:
+          {
+            future = _dio.get(path,
+                queryParameters: params,
+                options: option,
+                cancelToken: cancelToken);
+          }
+      }
 
       Response response = await future;
-      return _parseResponseThenCallback(
-          response, respConfig, onFromJson, null, null);
+      return _parseResponse(response, respConfig, onFromJson);
     } on Exception catch (e) {
       return BaseResp(false, error: CstHttpException.createHttpException(e));
     }
-  }
-
-  Future<Response<T>> _requestWithFuture<T>({
-    required String path,
-    ReqType reqType = ReqType.get,
-    Map<String, dynamic>? params,
-    Options? options,
-    Object? body,
-    CancelToken? cancelToken,
-    BaseRespConfig? respConfig,
-    CacheMode? cacheMode = CacheMode.ONLY_NETWORK,
-    int? cacheTime,
-    String? customCacheKey,
-  }) {
-    Options option =
-        _copyOptions(options, cacheMode, cacheTime, customCacheKey);
-
-    Future<Response<T>> future;
-    switch (reqType) {
-      case ReqType.post:
-        {
-          future = _dio.post(path,
-              data: body,
-              queryParameters: params,
-              options: option,
-              cancelToken: cancelToken);
-          break;
-        }
-      case ReqType.put:
-        {
-          future = _dio.put(path,
-              data: body,
-              queryParameters: params,
-              options: option,
-              cancelToken: cancelToken);
-          break;
-        }
-      case ReqType.delete:
-        {
-          future = _dio.delete(path,
-              data: body,
-              queryParameters: params,
-              options: option,
-              cancelToken: cancelToken);
-          break;
-        }
-      default:
-        {
-          future = _dio.get(path,
-              queryParameters: params,
-              options: option,
-              cancelToken: cancelToken);
-        }
-    }
-    return future;
   }
 
   /// 复制缓存options
@@ -255,12 +238,9 @@ class HttpManager {
     return requestOptions;
   }
 
-  BaseResp<T> _parseResponseThenCallback<T>(
-      Response response,
-      BaseRespConfig? respConfig,
-      OnFromJson<T>? onFromJson,
-      OnSuccess<T>? onSuccess,
-      OnFailed? onFailed) {
+  /// 解析请求的结果
+  BaseResp<T> _parseResponse<T>(Response response, BaseRespConfig? respConfig,
+      OnFromJson<T>? onFromJson) {
     String filedCode = respConfig?.filedCode ?? _respConfig.filedCode;
     String filedMsg = respConfig?.filedMsg ?? _respConfig.filedMsg;
     int successCode = respConfig?.successCode ?? _respConfig.successCode;
@@ -279,9 +259,7 @@ class HttpManager {
       }
 
       if (body == null) {
-        var error = CstHttpException(-1, "内容为空");
-        _onFailed(onFailed, error);
-        return BaseResp(false, error: error);
+        return BaseResp(false, error: CstHttpException(-1, "内容为空"));
       }
 
       // bytes转String并保存
@@ -296,18 +274,15 @@ class HttpManager {
         data = onFromJson == null ? null : onFromJson(result);
       }
     } catch (e) {
-      var error = CstHttpException(-1, "Json解析失败", detailMessage: e.toString());
-      _onFailed(onFailed, error);
-      return BaseResp(false, error: error);
+      return BaseResp(false,
+          error: CstHttpException(-1, "Json解析失败", detailMessage: e.toString()));
     }
 
     if (code != successCode) {
-      var error = CstHttpException(code, msg ?? "业务错误码不等于业务成功码");
-      _onFailed(onFailed, error);
-      return BaseResp(false, error: error);
+      return BaseResp(false,
+          error: CstHttpException(code, msg ?? "业务错误码不等于业务成功码"));
     }
 
-    _onSuccess(onSuccess, data);
     return BaseResp(true, data: data);
   }
 
@@ -324,16 +299,14 @@ class HttpManager {
     }
   }
 
-  void _callFuture<T>(Future<Response> future, BaseRespConfig? respConfig,
-      OnFromJson<T>? onFromJson, OnSuccess<T>? onSuccess, OnFailed? onFailed) {
-    future.then((response) {
-      _parseResponseThenCallback<T>(
-          response, respConfig, onFromJson, onSuccess, onFailed);
-    }, onError: (e) {
-      _onFailed(onFailed, CstHttpException.createHttpException(e));
-    }).catchError((e) {
-      return e;
-    });
+  /// 检查是走成功还是失败回调
+  _checkSuccessFailed<T>(
+      BaseResp<T> resp, OnSuccess<T>? onSuccess, OnFailed? onFailed) {
+    if (resp.isSuccess) {
+      _onSuccess(onSuccess, resp.data);
+    } else {
+      _onFailed(onFailed, resp.error ?? CstHttpException(-1, "未知异常"));
+    }
   }
 }
 

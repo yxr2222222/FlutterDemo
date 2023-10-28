@@ -10,20 +10,28 @@ abstract class BasePageListVM<T, E> extends BaseListVM<T> {
       controlFinishRefresh: true, controlFinishLoad: true);
 
   bool _loading = false;
+  bool? _firstRetryMultiStateLoading;
+  bool? _firstRetryDialogLoading;
+  String? _firstRetryLoadingTxt;
 
-  @protected
   int _page = 0;
 
   int get page => _page;
 
   @override
   void onRetry() {
-    firstLoad();
+    firstLoad(
+        multiStateLoading: _firstRetryMultiStateLoading,
+        dialogLoading: _firstRetryDialogLoading,
+        loadingTxt: _firstRetryLoadingTxt);
   }
 
   /// 首次加载，主要用于进入页面时即触发数据加载，且不想要下拉刷新的动作
   void firstLoad(
       {bool? multiStateLoading, bool? dialogLoading, String? loadingTxt}) {
+    this._firstRetryMultiStateLoading = multiStateLoading;
+    this._firstRetryDialogLoading = dialogLoading;
+    this._firstRetryLoadingTxt = loadingTxt;
     _page = initPage();
     if (multiStateLoading == true) {
       showLoadingState(loadingTxt: loadingTxt);
@@ -42,7 +50,6 @@ abstract class BasePageListVM<T, E> extends BaseListVM<T> {
           first: true,
           multiStateLoading: multiStateLoading,
           dialogLoading: dialogLoading);
-      if (!isFinishing()) {}
     }).catchError((e) {
       return e;
     });
@@ -127,7 +134,10 @@ abstract class BasePageListVM<T, E> extends BaseListVM<T> {
       {bool first = false, bool? multiStateLoading, bool? dialogLoading}) {
     if (!isFinishing()) {
       if (!resp.isSuccess) {
-        _refreshLoadFailed(isRefresh);
+        _refreshLoadFailed(isRefresh,
+            first: true,
+            multiStateLoading: multiStateLoading,
+            dialogLoading: dialogLoading);
       } else {
         var pageResult = createPageResult(resp);
         var itemList = pageResult?.itemList ?? <T>[];

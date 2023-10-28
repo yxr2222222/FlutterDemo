@@ -74,7 +74,7 @@ abstract class BaseVM {
     }
   }
 
-  /// 请求网络
+  /// 同步回调的网络请求
   void request<T>({
     required String path,
     required OnFromJson<T>? onFromJson,
@@ -150,6 +150,7 @@ abstract class BaseVM {
         customCacheKey: customCacheKey);
   }
 
+  /// 需要异步调用的网络请求
   Future<BaseResp<T>> requestWithFuture<T>({
     required String path,
     required OnFromJson<T>? onFromJson,
@@ -215,12 +216,15 @@ abstract class BaseVM {
     }
   }
 
+  /// widget生命周期是否没开始或已经结束
   bool isFinishing() {
     return _context == null || !_context!.isUseful();
   }
 }
 
+/// 展示loading的回调方法，主要是把UI操作赚到widget上
 typedef OnShowLoading = void Function(String? loadingTxt, Color barrierColor,
     bool barrierDismissible, bool cancelable);
 
+/// 隐藏loading的回调方法，主要是把UI操作赚到widget上
 typedef OnDismissLoading = void Function();
