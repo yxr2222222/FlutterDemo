@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/base/extension/BuildContextExtension.dart';
@@ -5,10 +7,8 @@ import 'package:flutter_demo/base/util/Log.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import '../http/HttpManager.dart';
-import '../http/cache/CacheMode.dart';
+import '../http/api/BaseApi.dart';
 import '../http/exception/CstHttpException.dart';
-import '../http/model/BaseRespConfig.dart';
-import '../http/model/ReqType.dart';
 import '../model/BaseResp.dart';
 import '../model/PermissionReq.dart';
 import '../util/PermissionUtil.dart';
@@ -16,9 +16,10 @@ import '../util/PermissionUtil.dart';
 abstract class BaseVM {
   String? _className;
   BuildContext? _context;
-  final List<CancelToken> _cancelTokenList = [];
   OnShowLoading? onShowLoading;
   OnDismissLoading? onDismissLoading;
+  final List<BaseApi> _apiList = [];
+  final List<CancelToken> _downloadCancelTokens = [];
 
   void init(BuildContext context) {
     _context = context;
@@ -48,6 +49,7 @@ abstract class BaseVM {
     _context = null;
     onShowLoading = null;
     onDismissLoading = null;
+    _cancelRequests();
     Log.d("$_className: onDestroy...");
   }
 
@@ -75,32 +77,15 @@ abstract class BaseVM {
   }
 
   /// 同步回调的网络请求
-  void request<T>({
-    required String path,
-    required OnFromJson<T>? onFromJson,
-    bool isNeedLoading = true,
-    bool isLoadingCancelable = false,
-    String? loadingTxt,
-    bool isShowErrorToast = false,
-    bool isShowErrorDetailToast = false,
-    OnSuccess<T>? onSuccess,
-    OnFailed? onFailed,
-    ReqType reqType = ReqType.get,
-    Map<String, dynamic>? params,
-    Options? options,
-    Object? body,
-    CancelToken? cancelToken,
-    BaseRespConfig? respConfig,
-    CacheMode? cacheMode = CacheMode.ONLY_NETWORK,
-    int? cacheTime,
-    String? customCacheKey,
-  }) {
-    // 如果没有传入取消标识则自动创建一个
-    cancelToken = cancelToken ?? CancelToken();
-
-    // 并将取消标识放到列表中统一管理
-    _cancelTokenList.add(cancelToken);
-
+  void request<T>(
+      {required Future<BaseResp<T>> future,
+      bool isNeedLoading = true,
+      bool isLoadingCancelable = false,
+      String? loadingTxt,
+      bool isShowErrorToast = false,
+      bool isShowErrorDetailToast = false,
+      OnSuccess<T>? onSuccess,
+      OnFailed? onFailed}) {
     // 根据需要展示loading弹框
     if (isNeedLoading) {
       showLoading(loadingTxt: loadingTxt, cancelable: isLoadingCancelable);
@@ -108,8 +93,7 @@ abstract class BaseVM {
 
     // 调用接口请求方法
     HttpManager.getInstance().request(
-        path: path,
-        onFromJson: onFromJson,
+        future: future,
         onSuccess: (T? data) {
           // 接口请求成功
           if (!isFinishing()) {
@@ -138,44 +122,65 @@ abstract class BaseVM {
               onFailed(e);
             }
           }
-        },
-        reqType: reqType,
-        params: params,
-        options: options,
-        body: body,
-        cancelToken: cancelToken,
-        respConfig: respConfig,
-        cacheMode: cacheMode,
-        cacheTime: cacheTime,
-        customCacheKey: customCacheKey);
+        });
   }
 
-  /// 需要异步调用的网络请求
-  Future<BaseResp<T>> requestWithFuture<T>({
-    required String path,
-    required OnFromJson<T>? onFromJson,
-    ReqType reqType = ReqType.get,
+  /// 下载文件
+  void download({
+    required String urlPath,
+    required filename,
+    bool isNeedLoading = true,
+    bool isLoadingCancelable = false,
+    String? loadingTxt,
     Map<String, dynamic>? params,
-    Options? options,
     Object? body,
+    Options? options,
     CancelToken? cancelToken,
-    BaseRespConfig? respConfig,
-    CacheMode? cacheMode = CacheMode.ONLY_NETWORK,
-    int? cacheTime,
-    String? customCacheKey,
+    OnSuccess<File>? onSuccess,
+    ProgressCallback? onProgress,
+    OnFailed? onFailed,
   }) async {
-    return HttpManager.getInstance().requestWithFuture<T>(
-        path: path,
-        onFromJson: onFromJson,
-        reqType: reqType,
+    cancelToken = cancelToken ?? CancelToken();
+    _downloadCancelTokens.add(cancelToken);
+
+    if (isNeedLoading) {
+      showLoading(loadingTxt: loadingTxt, cancelable: isLoadingCancelable);
+    }
+
+    HttpManager.getInstance().download(
+        urlPath: urlPath,
+        filename: filename,
         params: params,
-        options: options,
         body: body,
+        options: options,
         cancelToken: cancelToken,
-        respConfig: respConfig,
-        cacheMode: cacheMode,
-        cacheTime: cacheTime,
-        customCacheKey: customCacheKey);
+        onProgress: (progress, total) {
+          if (onProgress != null && !isFinishing()) {
+            onProgress(progress, total);
+          }
+        },
+        onSuccess: (file) {
+          if (!isFinishing()) {
+            if (isNeedLoading) {
+              dismissLoading();
+            }
+
+            if (onSuccess != null) {
+              onSuccess(file);
+            }
+          }
+        },
+        onFailed: (e) {
+          if (!isFinishing()) {
+            if (isNeedLoading) {
+              dismissLoading();
+            }
+
+            if (onFailed != null) {
+              onFailed(e);
+            }
+          }
+        });
   }
 
   /// 展示loading弹框
@@ -198,11 +203,15 @@ abstract class BaseVM {
   }
 
   /// 取消所有未完成的网络请求
-  void cancelRequests() {
-    for (var cancelToken in _cancelTokenList) {
+  void _cancelRequests() {
+    for (var api in _apiList) {
+      api.cancelRequests();
+    }
+
+    for (var cancelToken in _downloadCancelTokens) {
       cancelRequest(cancelToken);
     }
-    _cancelTokenList.clear();
+    _downloadCancelTokens.clear();
   }
 
   /// 取消某个网络请求
@@ -219,6 +228,13 @@ abstract class BaseVM {
   /// widget生命周期是否没开始或已经结束
   bool isFinishing() {
     return _context == null || !_context!.isUseful();
+  }
+
+  API createApi<API extends BaseApi>(API api) {
+    if (!_apiList.contains(api)) {
+      _apiList.add(api);
+    }
+    return api;
   }
 }
 

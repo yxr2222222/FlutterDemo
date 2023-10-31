@@ -7,7 +7,7 @@ import '../model/BaseGetxController.dart';
 class GetBuilderUtil {
   static StatefulWidget builder<T extends BaseGetxController>(
       OnGetBuilder<T> onGetBuilder,
-      {T? init, String? id}) {
+      {required T? init, String? id}) {
     return GetBuilder<T>(
         id: id,
         init: init,

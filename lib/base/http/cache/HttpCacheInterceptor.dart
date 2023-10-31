@@ -1,6 +1,5 @@
-import 'dart:io';
-
 import 'package:dio/dio.dart';
+import 'package:flutter_demo/base/extension/ObjectExtension.dart';
 import 'package:flutter_demo/base/http/cache/CacheConfig.dart';
 import 'package:flutter_demo/base/http/cache/CacheManager.dart';
 import 'package:flutter_demo/base/http/cache/CacheMode.dart';
@@ -17,7 +16,7 @@ class HttpCacheInterceptor extends Interceptor {
   void onRequest(
       RequestOptions options, RequestInterceptorHandler handler) async {
     // 因为使用的是sqflite本地存储方式，暂不支持web等其他版本
-    if (!Platform.isIOS && !Platform.isAndroid) {
+    if (!isAndroid() && !isIOS()) {
       return super.onRequest(options, handler);
     }
 
@@ -44,7 +43,7 @@ class HttpCacheInterceptor extends Interceptor {
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) async {
     // 因为使用的是sqflite本地存储方式，暂不支持web等其他版本
-    if (!Platform.isIOS && !Platform.isAndroid) {
+    if (!isAndroid() && !isIOS()) {
       return super.onResponse(response, handler);
     }
 
@@ -66,7 +65,7 @@ class HttpCacheInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
     // 因为使用的是sqflite本地存储方式，暂不支持web等其他版本
-    if (!Platform.isIOS && !Platform.isAndroid) {
+    if (!isAndroid() && !isIOS()) {
       return super.onError(err, handler);
     }
 
@@ -93,6 +92,7 @@ class HttpCacheInterceptor extends Interceptor {
   }
 
   CacheMode _getCacheMode(RequestOptions options) {
-    return options.extra[CacheStrategy.CACHE_MODE] ?? cacheConfig.defaultCacheMode;
+    return options.extra[CacheStrategy.CACHE_MODE] ??
+        cacheConfig.defaultCacheMode;
   }
 }

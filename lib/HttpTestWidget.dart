@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_demo/api/AppUpdateApi.dart';
 import 'package:flutter_demo/base/model/SimpleGetxController.dart';
+import 'package:flutter_demo/base/ui/widget/SimpleWidget.dart';
 import 'package:flutter_demo/base/util/GetBuilderUtil.dart';
-import 'package:flutter_demo/base/widget/BaseMultiStateWidget.dart';
+import 'package:flutter_demo/base/util/Log.dart';
 
+import 'base/ui/page/BaseMultiStateWidget.dart';
 import 'base/vm/BaseMultiStateVM.dart';
 import 'model/app_update.dart';
 
@@ -16,43 +19,46 @@ class HttpTestWidget extends BaseMultiStateWidget<_HttpTestVM> {
 class _HttpTestWidgetState
     extends BaseMultiStateWidgetState<_HttpTestVM, HttpTestWidget> {
   @override
-  Widget createContentView(BuildContext context, _HttpTestVM viewModel) {
+  Widget createMultiContentWidget(BuildContext context, _HttpTestVM viewModel) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        GestureDetector(
-          onTap: () {
-            viewModel.requestAppUpdate();
-          },
-          child: Container(
-              margin: const EdgeInsets.only(top: 16),
-              width: 200,
-              height: 60,
-              decoration: const BoxDecoration(
-                  color: Colors.green,
-                  borderRadius: BorderRadius.all(Radius.circular(8))),
-              alignment: Alignment.center,
-              child: const Text('检查更新',
-                  style: TextStyle(fontSize: 20, color: Colors.white))),
-        ),
+        ClickableContainer(
+            margin: const EdgeInsets.only(top: 16),
+            width: 200,
+            height: 60,
+            decoration: const BoxDecoration(
+                color: Colors.green,
+                borderRadius: BorderRadius.all(Radius.circular(8))),
+            alignment: Alignment.center,
+            onTap: () {
+              viewModel.requestAppUpdate();
+            },
+            child: GetBuilderUtil.builder(
+                (controller) => Text(viewModel.stateTxt.data ?? "检查更新",
+                    style: const TextStyle(fontSize: 20, color: Colors.white)),
+                init: viewModel.stateTxt)),
         GetBuilderUtil.builder(
             (controller) => Text(
-                  '${viewModel.appUpdateController.data?.toJson()}',
+                  '${viewModel.appUpdate.data?.toJson()}',
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
-            init: viewModel.appUpdateController),
+            init: viewModel.appUpdate),
       ],
     );
   }
 }
 
 class _HttpTestVM extends BaseMultiStateVM {
-  final SimpleGetxController<AppUpdate> appUpdateController =
-      SimpleGetxController();
+  final SimpleGetxController<AppUpdate> appUpdate = SimpleGetxController();
+  final SimpleGetxController<String> stateTxt = SimpleGetxController("检查更新");
+  late AppUpdateApi appUpdateApi;
 
   @override
   void onCreate() {
     super.onCreate();
+    appUpdateApi = createApi(AppUpdateApi());
+
     requestAppUpdate();
   }
 
@@ -63,16 +69,32 @@ class _HttpTestVM extends BaseMultiStateVM {
 
   /// 请求应用更新信息
   void requestAppUpdate() {
-    requestWithState<AppUpdate>(
-        path: "/pub/appUpdate/getAppUpdate",
-        loadingTxt: "loading...",
-        params: {"os": "0", "machine": "afhkeagjhakgaekl", "version": "1.0.0"},
-        onFromJson: (Map<String, dynamic> json) {
-          return AppUpdate.fromJson(json['data']);
-        },
-        onSuccess: (AppUpdate? data) {
-          appUpdateController.data = data;
-          appbarController.appbarTitle = data?.title ?? "未知标题";
-        });
+    var data = appUpdate.data;
+    if (data != null) {
+      download(
+          urlPath: data.schemeUrl,
+          filename: "教堂大全.apk",
+          onSuccess: (file) {
+            showToast("下载成功: ${file?.path}");
+          },
+          onFailed: (e) {
+            showToast("${e.message}");
+            Log.d("下载失败", error: e);
+            stateTxt.data = "下载APP";
+          },
+          onProgress: (progress, total) {
+            Log.d("下载中 progress: $progress, total: $total");
+            stateTxt.data = "${(progress * 100.0 / total).toStringAsFixed(2)}%";
+          });
+    } else {
+      requestWithState(
+          future: appUpdateApi.getAppUpdate(),
+          loadingTxt: "loading...",
+          onSuccess: (AppUpdate? data) {
+            stateTxt.data = "下载APP";
+            appUpdate.data = data;
+            appbarController.appbarTitle = data?.title ?? "未知标题";
+          });
+    }
   }
 }

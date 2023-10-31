@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/base/vm/BaseMultiStateVM.dart';
-import 'package:flutter_demo/base/widget/BaseMultiStateWidget.dart';
-import 'package:flutter_demo/base/widget/BottomNavigationBarViewPager.dart';
 import 'package:flutter_demo/tab/BasketPage.dart';
 import 'package:flutter_demo/tab/HomePage.dart';
 import 'package:flutter_demo/tab/KindPage.dart';
 import 'package:flutter_demo/tab/MinePage.dart';
+
+import '../base/ui/page/BaseMultiStateWidget.dart';
+import '../base/ui/widget/BottomNavigationBarViewPager.dart';
 
 class ViewPagerTest extends BaseMultiStateWidget<_ViewPagerVM> {
   ViewPagerTest({super.key}) : super(viewModel: _ViewPagerVM());
@@ -17,7 +18,7 @@ class ViewPagerTest extends BaseMultiStateWidget<_ViewPagerVM> {
 class _ViewPagerTestState
     extends BaseMultiStateWidgetState<_ViewPagerVM, ViewPagerTest> {
   @override
-  Widget createContentView(BuildContext context, _ViewPagerVM viewModel) {
+  Widget createMultiContentWidget(BuildContext context, _ViewPagerVM viewModel) {
     List<ViewPagerData> viewPagerDataList = [
       ViewPagerData(
           pageWidget: HomePage(),

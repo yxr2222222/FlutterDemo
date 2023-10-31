@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_demo/base/model/AppbarController.dart';
 import 'package:flutter_demo/base/model/ViewStateController.dart';
 import 'package:flutter_demo/base/model/em/ViewState.dart';
-import 'package:flutter_demo/base/widget/BaseWidget.dart';
 
-import '../util/GetBuilderUtil.dart';
-import '../vm/BaseMultiStateVM.dart';
+import '../../util/GetBuilderUtil.dart';
+import '../../vm/BaseMultiStateVM.dart';
+import 'BaseWidget.dart';
 
 abstract class BaseMultiStateWidget<VM extends BaseMultiStateVM>
     extends BaseWidget<VM> {
@@ -17,7 +17,7 @@ abstract class BaseMultiStateWidgetState<VM extends BaseMultiStateVM,
   Widget? _contentView, _loadingView, _errorView, _emptyView;
 
   @override
-  Widget createChild(BuildContext context, VM viewModel) => Scaffold(
+  Widget createContentWidget(BuildContext context, VM viewModel) => Scaffold(
       appBar: PreferredSize(
         preferredSize: Size(MediaQuery.of(context).size.width, 56.0),
         child: createAppBar(context, viewModel),
@@ -44,7 +44,7 @@ abstract class BaseMultiStateWidgetState<VM extends BaseMultiStateVM,
         _emptyView ??= createEmptyView(context, viewModel, controller);
         return _emptyView!;
       default:
-        _contentView ??= createContentView(context, viewModel);
+        _contentView ??= createMultiContentWidget(context, viewModel);
         return _contentView!;
     }
   }
@@ -198,5 +198,5 @@ abstract class BaseMultiStateWidgetState<VM extends BaseMultiStateVM,
   }
 
   /// 创建内容控件，抽象方法，子类必须实现
-  Widget createContentView(BuildContext context, VM viewModel);
+  Widget createMultiContentWidget(BuildContext context, VM viewModel);
 }

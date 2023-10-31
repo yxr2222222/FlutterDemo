@@ -40,9 +40,10 @@ class DefaultLoadingDialog extends Dialog {
                               margin: const EdgeInsets.only(top: 16),
                               child: Text(
                                 loadingTxt ?? "",
-                                maxLines: 2,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                                 style: const TextStyle(
-                                    fontSize: 14, color: Color(0xff5c5c5c)),
+                                    fontSize: 12, color: Color(0xff5c5c5c)),
                               )),
                         )
                       ],

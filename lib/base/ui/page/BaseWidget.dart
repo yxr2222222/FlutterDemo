@@ -1,12 +1,11 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/base/extension/BuildContextExtension.dart';
+import 'package:flutter_demo/base/extension/ObjectExtension.dart';
 import 'package:flutter_demo/base/vm/BaseVM.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
-import 'DefaultLoadingDialog.dart';
+import '../widget/DefaultLoadingDialog.dart';
 
 abstract class BaseWidget<VM extends BaseVM> extends StatefulWidget {
   final VM viewModel;
@@ -43,12 +42,12 @@ abstract class BaseWidgetState<VM extends BaseVM, W extends BaseWidget<VM>>
         _onResume(true);
       },
       onHide: () {
-        if (!Platform.isAndroid && !Platform.isIOS) {
+        if (!isAndroid() && !isIOS()) {
           _onPause(true);
         }
       },
       onPause: () {
-        if (Platform.isAndroid || Platform.isIOS) {
+        if (isAndroid() || isIOS()) {
           _onPause(true);
         }
       },
@@ -62,7 +61,7 @@ abstract class BaseWidgetState<VM extends BaseVM, W extends BaseWidget<VM>>
     return WillPopScope(
         child: VisibilityDetector(
             key: UniqueKey(),
-            child: createChild(context, viewModel),
+            child: createContentWidget(context, viewModel),
             onVisibilityChanged: (visibilityInfo) {
               var visiblePercentage = visibilityInfo.visibleFraction * 100;
               if (visiblePercentage >= 80) {
@@ -159,6 +158,7 @@ abstract class BaseWidgetState<VM extends BaseVM, W extends BaseWidget<VM>>
       bool barrierDismissible = false,
       bool cancelable = false}) {
     dismissLoading();
+    _currLoading = context;
     showDialog(
         context: _context,
         barrierColor: barrierColor,
@@ -181,5 +181,5 @@ abstract class BaseWidgetState<VM extends BaseVM, W extends BaseWidget<VM>>
     return DefaultLoadingDialog(loadingTxt);
   }
 
-  Widget createChild(BuildContext context, VM viewModel);
+  Widget createContentWidget(BuildContext context, VM viewModel);
 }

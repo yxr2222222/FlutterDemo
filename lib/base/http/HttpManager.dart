@@ -1,18 +1,20 @@
 import 'dart:convert';
-import 'dart:typed_data';
+import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter_demo/base/extension/ObjectExtension.dart';
 import 'package:flutter_demo/base/http/cache/CacheMode.dart';
 import 'package:flutter_demo/base/http/cache/CacheStrategy.dart';
 import 'package:flutter_demo/base/http/interceptor/LoggingInterceptor.dart';
 import 'package:flutter_demo/base/http/cache/HttpCacheInterceptor.dart';
 import 'package:flutter_demo/base/http/interceptor/RequestInterceptor.dart';
 import 'package:flutter_demo/base/util/Log.dart';
-
 import '../model/BaseResp.dart';
 import 'cache/CacheConfig.dart';
 import 'exception/CstHttpException.dart';
 import 'model/BaseRespConfig.dart';
 import 'model/ReqType.dart';
+// UnuseJs这个完成是为了过非Web端的编译
+import '../unuse/UnuseJs.dart' if (dart.library.js) 'dart:js' as js;
 
 class HttpManager {
   static final HttpManager _instance = HttpManager._internal();
@@ -125,42 +127,6 @@ class HttpManager {
     return _respConfig;
   }
 
-  /// 回调方式调用的网络请求
-  void request<T>({
-    required String path,
-    required OnFromJson<T>? onFromJson,
-    OnSuccess<T>? onSuccess,
-    OnFailed? onFailed,
-    ReqType reqType = ReqType.get,
-    Map<String, dynamic>? params,
-    Options? options,
-    Object? body,
-    CancelToken? cancelToken,
-    BaseRespConfig? respConfig,
-    CacheMode? cacheMode = CacheMode.ONLY_NETWORK,
-    int? cacheTime,
-    String? customCacheKey,
-  }) {
-    requestWithFuture<T>(
-            path: path,
-            onFromJson: onFromJson,
-            reqType: reqType,
-            params: params,
-            options: options,
-            body: body,
-            cancelToken: cancelToken,
-            respConfig: respConfig,
-            cacheMode: cacheMode,
-            cacheTime: cacheTime,
-            customCacheKey: customCacheKey)
-        .then((resp) => {_checkSuccessFailed(resp, onSuccess, onFailed)},
-            onError: (e) {
-      _onFailed(onFailed, CstHttpException.createHttpException(e));
-    }).catchError((e) {
-      return e;
-    });
-  }
-
   /// 需要异步调用的网络请求
   Future<BaseResp<T>> requestWithFuture<T>({
     required String path,
@@ -176,8 +142,10 @@ class HttpManager {
     String? customCacheKey,
   }) async {
     try {
-      Options option =
-          _copyOptions(options, cacheMode, cacheTime, customCacheKey);
+      Options option = _copyOptions(options,
+          cacheMode: cacheMode,
+          cacheTime: cacheTime,
+          customCacheKey: customCacheKey);
 
       Future<Response<dynamic>> future;
       switch (reqType) {
@@ -221,14 +189,106 @@ class HttpManager {
       return _parseResponse(response, respConfig, onFromJson);
     } on Exception catch (e) {
       return BaseResp(false, error: CstHttpException.createHttpException(e));
+    } on Error catch (e) {
+      return BaseResp(false,
+          error: CstHttpException.createHttpException(Exception(e)));
+    }
+  }
+
+  /// 回调方式调用的网络请求
+  void request<T>(
+      {required Future<BaseResp<T>> future,
+      OnSuccess<T>? onSuccess,
+      OnFailed? onFailed}) {
+    future.then((resp) => {_checkSuccessFailed(resp, onSuccess, onFailed)},
+        onError: (e) {
+      _onFailed(onFailed, CstHttpException.createHttpException(e));
+    }).catchError((e) {
+      return e;
+    });
+  }
+
+  /// 下载文件
+  void download({
+    required String urlPath,
+    required String filename,
+    Map<String, dynamic>? params,
+    Object? body,
+    Options? options,
+    CancelToken? cancelToken,
+    ProgressCallback? onProgress,
+    OnSuccess<File?>? onSuccess,
+    OnFailed? onFailed,
+  }) async {
+    if (isWeb()) {
+      // 如果是Web端，通过js交互实现。注意，需要将index.html下的<script>代码复制到自己项目指定位置
+      // Web端需要单独处理是因为dio的下载不支持Web端
+      webOnProgress(progress, total) {
+        if (onProgress != null) {
+          onProgress(progress, total);
+        }
+      }
+
+      webOnSuccess() {
+        if (onSuccess != null) {
+          onSuccess(null);
+        }
+      }
+
+      webOnFailed(e) {
+        if (onFailed != null) {
+          onFailed(CstHttpException(-1, e.toString()));
+        }
+      }
+
+      js.context.callMethod('download',
+          [urlPath, filename, webOnProgress, webOnSuccess, webOnFailed]);
+    } else {
+      var targetFile = await getDownloadPath(filename: filename);
+      try {
+        // 其他端使用dio的下载
+        await _dio.download(urlPath, targetFile.path,
+            queryParameters: params,
+            data: body,
+            options: options,
+            deleteOnError: true,
+            lengthHeader: Headers.contentLengthHeader,
+            cancelToken: cancelToken, onReceiveProgress: (progress, total) {
+          if (onProgress != null) {
+            onProgress(progress, total);
+          }
+
+          if (cancelToken?.isCancelled == true && onFailed != null) {
+            onFailed(CstHttpException(-1, "下载已取消"));
+          }
+
+          if (cancelToken?.isCancelled == false &&
+              total != -1 &&
+              progress >= total &&
+              onSuccess != null) {
+            onSuccess(targetFile);
+          }
+        });
+      } catch (e) {
+        if (onFailed != null) {
+          String? detailMessage;
+          if (e is Error) {
+            detailMessage = e.stackTrace?.toString();
+          } else {
+            detailMessage = e.toString();
+          }
+          onFailed(CstHttpException(-1, "下载失败", detailMessage: detailMessage));
+        }
+      }
     }
   }
 
   /// 复制缓存options
-  Options _copyOptions(Options? options, CacheMode? cacheMode, int? cacheTime,
-      String? customCacheKey) {
+  Options _copyOptions(Options? options,
+      {CacheMode? cacheMode, int? cacheTime, String? customCacheKey}) {
     Options requestOptions = options ?? Options();
     requestOptions = requestOptions.copyWith(
+      responseType: ResponseType.bytes,
       extra: {
         CacheStrategy.CACHE_MODE: cacheMode ?? CacheMode.ONLY_NETWORK,
         CacheStrategy.CACHE_TIME: cacheTime,
@@ -251,21 +311,19 @@ class HttpManager {
 
     try {
       // 获取response bytes 数据
-      List<int>? body;
+      if (response.data == null) {
+        return BaseResp(false, error: CstHttpException(-1, "内容为空"));
+      }
+
+      // 获取response bytes 数据
+      List<int> body;
       if (response.requestOptions.responseType == ResponseType.bytes) {
         body = response.data;
       } else {
         body = utf8.encode(jsonEncode(response.data));
       }
 
-      if (body == null) {
-        return BaseResp(false, error: CstHttpException(-1, "内容为空"));
-      }
-
-      // bytes转String并保存
-      Uint8List bytes = Uint8List.fromList(body);
-
-      Map<String, dynamic> result = jsonDecode(utf8.decode(bytes));
+      Map<String, dynamic> result = jsonDecode(utf8.decode(body));
 
       code = result[filedCode] ?? -1;
       msg = result[filedMsg];
@@ -275,7 +333,7 @@ class HttpManager {
       }
     } catch (e) {
       return BaseResp(false,
-          error: CstHttpException(-1, "Json解析失败", detailMessage: e.toString()));
+          error: CstHttpException(-1, "Resp解析失败", detailMessage: e.toString()));
     }
 
     if (code != successCode) {

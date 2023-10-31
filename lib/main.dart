@@ -4,17 +4,17 @@ import 'package:flutter_demo/RefreshLoadTestWidget.dart';
 import 'package:flutter_demo/base/extension/BuildContextExtension.dart';
 import 'package:flutter_demo/base/model/PermissionReq.dart';
 import 'package:flutter_demo/base/vm/BaseListVM.dart';
-import 'package:flutter_demo/base/widget/BaseMultiStateWidget.dart';
 import 'package:flutter_demo/tab/ViewPagerTest.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'base/http/HttpManager.dart';
 import 'base/http/model/BaseRespConfig.dart';
+import 'base/ui/page/BaseMultiStateWidget.dart';
 
 void main() {
   /// 初始化网络请求配置
   HttpManager.getInstance().init(
-      baseUrl: "http://192.168.2.42:8089/",
+      baseUrl: "http://192.168.1.116:8089/",
       debug: true,
       respConfig: BaseRespConfig(filedCode: "code", filedMsg: "message"));
   runApp(const MyApp());
@@ -47,7 +47,7 @@ class _MyHomePage extends BaseMultiStateWidget<_MyHomePageVM> {
 class _MyHomePageState
     extends BaseMultiStateWidgetState<_MyHomePageVM, _MyHomePage> {
   @override
-  Widget createContentView(BuildContext context, _MyHomePageVM viewModel) {
+  Widget createMultiContentWidget(BuildContext context, _MyHomePageVM viewModel) {
     return viewModel.listBuilder(
       onItemClick: (item, context) {
         if (_MyHomePageVM.API == item.item.title) {

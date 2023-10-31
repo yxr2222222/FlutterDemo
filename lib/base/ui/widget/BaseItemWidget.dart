@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import '../vm/BaseListVM.dart';
+import '../../vm/BaseListVM.dart';
 
 class BaseItemWidget<T> extends StatefulWidget {
   final ChildItemBuilder<T> childItemBuilder;

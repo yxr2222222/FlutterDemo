@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_demo/base/vm/BaseVM.dart';
-import 'package:flutter_demo/base/widget/BaseWidget.dart';
+
+import '../base/ui/page/BaseWidget.dart';
 
 class KindPage extends BaseWidget<_KindVM> {
   KindPage({super.key}) : super(viewModel: _KindVM());
@@ -11,7 +12,7 @@ class KindPage extends BaseWidget<_KindVM> {
 
 class _KindPageState extends BaseWidgetState<_KindVM, KindPage> {
   @override
-  Widget createChild(BuildContext context, _KindVM viewModel) {
+  Widget createContentWidget(BuildContext context, _KindVM viewModel) {
     return const Center(child: Text("KindPage"));
   }
 

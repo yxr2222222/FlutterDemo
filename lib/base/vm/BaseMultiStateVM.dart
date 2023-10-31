@@ -1,14 +1,11 @@
-import 'package:dio/dio.dart';
 import 'package:flutter_demo/base/model/ViewStateController.dart';
 import 'package:flutter_demo/base/model/em/ViewState.dart';
 import 'package:flutter_demo/base/vm/BaseVM.dart';
 
 import '../http/HttpManager.dart';
-import '../http/cache/CacheMode.dart';
 import '../http/exception/CstHttpException.dart';
-import '../http/model/BaseRespConfig.dart';
-import '../http/model/ReqType.dart';
 import '../model/AppbarController.dart';
+import '../model/BaseResp.dart';
 
 abstract class BaseMultiStateVM extends BaseVM {
   // 页面状态
@@ -27,12 +24,14 @@ abstract class BaseMultiStateVM extends BaseVM {
 
   /// 展示错误状态的UI
   void showErrorState({String? errorTxt, String? retryTxt}) {
-    stateController.refreshState(ViewState.error, hintTxt: errorTxt, retryTxt: retryTxt);
+    stateController.refreshState(ViewState.error,
+        hintTxt: errorTxt, retryTxt: retryTxt);
   }
 
   /// 展示空状态的UI
   void showEmptyState({String? emptyTxt, String? retryTxt}) {
-    stateController.refreshState(ViewState.empty, hintTxt: emptyTxt, retryTxt: retryTxt);
+    stateController.refreshState(ViewState.empty,
+        hintTxt: emptyTxt, retryTxt: retryTxt);
   }
 
   /// 重试按钮被点击
@@ -40,29 +39,18 @@ abstract class BaseMultiStateVM extends BaseVM {
 
   /// 结合多状态UI的网络请求
   void requestWithState<T>({
-    required String path,
-    required OnFromJson<T>? onFromJson,
+    required Future<BaseResp<T>> future,
     String? loadingTxt,
     bool isShowErrorDetail = false,
     String? retryTxt,
     OnSuccess<T>? onSuccess,
     OnFailed? onFailed,
-    ReqType reqType = ReqType.get,
-    Map<String, dynamic>? params,
-    Options? options,
-    Object? body,
-    CancelToken? cancelToken,
-    BaseRespConfig? respConfig,
-    CacheMode? cacheMode = CacheMode.ONLY_NETWORK,
-    int? cacheTime,
-    String? customCacheKey,
   }) {
     // 展示loading状态UI
     showLoadingState(loadingTxt: loadingTxt);
 
     super.request(
-        path: path,
-        onFromJson: onFromJson,
+        future: future,
         isNeedLoading: false,
         loadingTxt: loadingTxt,
         isShowErrorToast: false,
@@ -90,15 +78,6 @@ abstract class BaseMultiStateVM extends BaseVM {
               onFailed(e);
             }
           }
-        },
-        reqType: reqType,
-        params: params,
-        options: options,
-        body: body,
-        cancelToken: cancelToken,
-        respConfig: respConfig,
-        cacheMode: cacheMode,
-        cacheTime: cacheTime,
-        customCacheKey: customCacheKey);
+        });
   }
 }

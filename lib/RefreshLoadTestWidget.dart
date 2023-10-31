@@ -2,21 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_demo/base/model/BaseResp.dart';
 import 'package:flutter_demo/base/model/PageResult.dart';
 import 'package:flutter_demo/base/vm/BasePageListVM.dart';
-import 'package:flutter_demo/base/widget/BaseMultiStateWidget.dart';
+
+import 'api/TestPageDataApi.dart';
+import 'base/ui/page/BaseMultiStateWidget.dart';
 
 class RefreshLoadTestWidget extends BaseMultiStateWidget<_RefreshLoadTestVM> {
   RefreshLoadTestWidget({super.key}) : super(viewModel: _RefreshLoadTestVM());
 
   @override
-  State<StatefulWidget> createState() {
-    return _RefreshLoadTestWidgetState();
-  }
+  State<StatefulWidget> createState() => _RefreshLoadTestWidgetState();
 }
 
 class _RefreshLoadTestWidgetState extends BaseMultiStateWidgetState<
     _RefreshLoadTestVM, RefreshLoadTestWidget> {
   @override
-  Widget createContentView(BuildContext context, _RefreshLoadTestVM viewModel) {
+  Widget createMultiContentWidget(
+      BuildContext context, _RefreshLoadTestVM viewModel) {
     return viewModel.listRefreshBuilder(onItemClick: (item, context) {
       item.item.clickNum = item.item.clickNum + 1;
       item.refresh();
@@ -47,22 +48,21 @@ class _RefreshLoadTestWidgetState extends BaseMultiStateWidgetState<
 class _RefreshLoadTestVM extends BasePageListVM<TesItem, List<dynamic>> {
   _RefreshLoadTestVM();
 
+  late TestPageDataApi testPageDataApi;
+
   @override
   void onCreate() {
     super.onCreate();
     appbarController.appbarTitle = "下拉刷新/上拉加载";
+
+    testPageDataApi = createApi(TestPageDataApi());
+
     firstLoad(multiStateLoading: true);
   }
 
   @override
   Future<BaseResp<List<dynamic>>> loadData(int page, int pageSize) {
-    var future = requestWithFuture<List<dynamic>>(
-        path: "/pub/test/pageData",
-        params: {"page": page, "pageSize": 20},
-        onFromJson: (Map<String, dynamic> json) {
-          return json['data'];
-        });
-    return future;
+    return testPageDataApi.getTestPageData(page: page);
   }
 
   @override

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_demo/base/vm/BaseVM.dart';
-import 'package:flutter_demo/base/widget/BaseWidget.dart';
+
+import '../base/ui/page/BaseWidget.dart';
 
 class MinePage extends BaseWidget<_MineVM> {
   MinePage({super.key}) : super(viewModel: _MineVM());
@@ -11,7 +12,7 @@ class MinePage extends BaseWidget<_MineVM> {
 
 class _MinePageState extends BaseWidgetState<_MineVM, MinePage> {
   @override
-  Widget createChild(BuildContext context, _MineVM viewModel) {
+  Widget createContentWidget(BuildContext context, _MineVM viewModel) {
     return const Center(child: Text("MinePage"));
   }
 
