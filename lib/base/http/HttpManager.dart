@@ -10,6 +10,7 @@ import 'package:flutter_demo/base/http/interceptor/RequestInterceptor.dart';
 import 'package:flutter_demo/base/util/Log.dart';
 import '../model/BaseResp.dart';
 import 'cache/CacheConfig.dart';
+import 'cache/CacheManager.dart';
 import 'exception/CstHttpException.dart';
 import 'model/BaseRespConfig.dart';
 import 'model/ReqType.dart';
@@ -85,6 +86,7 @@ class HttpManager {
 
     if (cacheConfig != null) {
       // 如果有缓存配置
+      CacheManager.getInstance().init();
       _dio.interceptors.add(HttpCacheInterceptor(cacheConfig));
     }
   }
@@ -208,7 +210,7 @@ class HttpManager {
     });
   }
 
-  /// 下载文件
+  /// 下载文件，由于web端适配问题，没有通过Future的方式
   void download({
     required String urlPath,
     required String filename,

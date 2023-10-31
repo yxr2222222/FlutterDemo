@@ -17,6 +17,7 @@ class CacheManager {
   CacheManager._internal() {
     openDatabase("basic_http_cache.db", version: 1,
         onCreate: (Database db, int version) {
+      Log.d("basic_http_cache...onCreate");
       // 创建缓存表
       db.execute(
           "CREATE TABLE IF NOT EXISTS HttpCacheObj(cacheKey TEXT PRIMARY KEY, cacheValue TEXT NOT NULL, expireTime INTEGER NOT NULL, updateTime INTEGER NOT NULL)");
@@ -24,14 +25,20 @@ class CacheManager {
       // 删除过期数据
       db.execute(
           "DELETE FROM HttpCacheObj WHERE expireTime <= ${DateTime.now().millisecondsSinceEpoch}");
-    }).then((db) => () {
-          _database = db;
-        });
+    }).then((db) {
+      _database = db;
+    }, onError: (e) {
+      Log.d(e.toString());
+    }).catchError((e) {
+      return e;
+    });
   }
 
   static CacheManager getInstance() {
     return _instance;
   }
+
+  void init() {}
 
   /// 根据请求获取缓存
   Future<HttpCacheObj?>? getCacheWithReq(RequestOptions options) async {
@@ -44,33 +51,31 @@ class CacheManager {
     try {
       var cacheKey = getCacheKeyWithReq(response.requestOptions);
       if (cacheKey != null) {
-        _database?.transaction((txn) async {
+        // 获取response bytes 数据
+        List<int>? data;
+        if (response.requestOptions.responseType == ResponseType.bytes) {
+          data = response.data;
+        } else {
+          data = utf8.encode(jsonEncode(response.data));
+        }
+
+        if (data != null) {
+          // bytes转String并保存
+          Uint8List bytes = Uint8List.fromList(data);
+          String cacheValue = utf8.decode(bytes);
+
+          int cacheTime =
+              response.requestOptions.extra[CacheStrategy.CACHE_TIME] ??
+                  defaultCacheTime;
+          int expireTime = DateTime.now().millisecondsSinceEpoch + cacheTime;
+
           // 先删除老的缓存
           await _database?.delete("HttpCacheObj",
               where: "cacheKey = ?", whereArgs: [cacheKey]);
 
-          // 获取response bytes 数据
-          List<int>? data;
-          if (response.requestOptions.responseType == ResponseType.bytes) {
-            data = response.data;
-          } else {
-            data = utf8.encode(jsonEncode(response.data));
-          }
-
-          if (data != null) {
-            // bytes转String并保存
-            Uint8List bytes = Uint8List.fromList(data);
-            String cacheValue = utf8.decode(bytes);
-
-            int cacheTime =
-                response.requestOptions.extra[CacheStrategy.CACHE_TIME] ??
-                    defaultCacheTime;
-            int expireTime = DateTime.now().millisecondsSinceEpoch + cacheTime;
-
-            var cache = HttpCacheObj(cacheKey, cacheValue, expireTime);
-            await _database?.insert("HttpCacheObj", cache.toJson());
-          }
-        });
+          var cache = HttpCacheObj(cacheKey, cacheValue, expireTime);
+          await _database?.insert("HttpCacheObj", cache.toJson());
+        }
       }
     } catch (e) {
       Log.d("Http request cache error!", error: e);
@@ -79,15 +84,16 @@ class CacheManager {
 
   /// 获取缓存
   Future<HttpCacheObj?>? getCache(String cacheKey) async {
-    var map = await _database
-        ?.query("HttpCacheObj", where: "cacheKey = ?", whereArgs: [cacheKey]);
-    var cache = map?.first;
-    if (cache != null) {
-      try {
-        return jsonDecode(jsonEncode(cache));
-      } catch (e) {
-        return null;
+    try {
+      var map = await _database
+          ?.query("HttpCacheObj", where: "cacheKey = ?", whereArgs: [cacheKey]);
+      Map<String, dynamic>? cacheMap = map?.firstOrNull;
+      if (cacheMap != null) {
+        return HttpCacheObj(cacheMap["cacheKey"], cacheMap["cacheValue"],
+            cacheMap["expireTime"]);
       }
+    } catch (e) {
+      return null;
     }
     return null;
   }

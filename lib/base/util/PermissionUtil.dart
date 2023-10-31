@@ -34,7 +34,9 @@ class PermissionUtil {
       } else {
         _checkRequestPermission(context, permissionReq);
       }
-    }, onError: (e) {}).catchError((e) {
+    }, onError: (e) {
+      _onDenied(permissionReq.onDenied, false);
+    }).catchError((e) {
       return e;
     });
   }

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_demo/base/extension/ObjectExtension.dart';
 import 'package:flutter_demo/base/http/cache/CacheConfig.dart';
@@ -38,6 +40,7 @@ class HttpCacheInterceptor extends Interceptor {
       }
       return handler.resolve(_buildResponse(cache, options), true);
     }
+    return super.onRequest(options, handler);
   }
 
   @override
@@ -81,14 +84,22 @@ class HttpCacheInterceptor extends Interceptor {
         // 如果没有缓存或者缓存过期了
         return super.onError(err, handler);
       }
+
       return handler.resolve(_buildResponse(cache, options));
     }
     return super.onError(err, handler);
   }
 
   Response _buildResponse(HttpCacheObj obj, RequestOptions options) {
+    options = options.copyWith(
+      extra: {
+        CacheStrategy.CACHE_MODE: CacheMode.ONLY_NETWORK,
+      },
+    );
     return Response(
-        data: obj, requestOptions: options.copyWith(), statusCode: 200);
+        data: utf8.encode(obj.cacheValue),
+        requestOptions: options,
+        statusCode: 200);
   }
 
   CacheMode _getCacheMode(RequestOptions options) {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_demo/HttpTestWidget.dart';
 import 'package:flutter_demo/RefreshLoadTestWidget.dart';
 import 'package:flutter_demo/base/extension/BuildContextExtension.dart';
+import 'package:flutter_demo/base/http/cache/CacheConfig.dart';
 import 'package:flutter_demo/base/model/PermissionReq.dart';
 import 'package:flutter_demo/base/vm/BaseListVM.dart';
 import 'package:flutter_demo/tab/ViewPagerTest.dart';
@@ -12,9 +13,12 @@ import 'base/http/model/BaseRespConfig.dart';
 import 'base/ui/page/BaseMultiStateWidget.dart';
 
 void main() {
+  /// 在main函数第一行添加这句话
+  WidgetsFlutterBinding.ensureInitialized();
   /// 初始化网络请求配置
   HttpManager.getInstance().init(
       baseUrl: "http://192.168.1.116:8089/",
+      cacheConfig: CacheConfig(),
       debug: true,
       respConfig: BaseRespConfig(filedCode: "code", filedMsg: "message"));
   runApp(const MyApp());
