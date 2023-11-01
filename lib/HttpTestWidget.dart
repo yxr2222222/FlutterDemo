@@ -23,7 +23,7 @@ class _HttpTestWidgetState
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        ClickableContainer(
+        SimpleWidget(
             margin: const EdgeInsets.only(top: 16),
             width: 200,
             height: 60,

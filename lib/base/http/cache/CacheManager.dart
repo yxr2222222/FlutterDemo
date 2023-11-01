@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_demo/base/extension/ObjectExtension.dart';
 import 'package:flutter_demo/base/http/cache/CacheStrategy.dart';
 import 'package:flutter_demo/base/http/cache/HttpCacheObj.dart';
 import 'package:flutter_demo/base/util/Log.dart';
@@ -15,23 +16,25 @@ class CacheManager {
 
   /// 私有的命名构造函数
   CacheManager._internal() {
-    openDatabase("basic_http_cache.db", version: 1,
-        onCreate: (Database db, int version) {
-      Log.d("basic_http_cache...onCreate");
-      // 创建缓存表
-      db.execute(
-          "CREATE TABLE IF NOT EXISTS HttpCacheObj(cacheKey TEXT PRIMARY KEY, cacheValue TEXT NOT NULL, expireTime INTEGER NOT NULL, updateTime INTEGER NOT NULL)");
+    if (isAndroid() || isIOS()) {
+      openDatabase("basic_http_cache.db", version: 1,
+          onCreate: (Database db, int version) {
+        Log.d("basic_http_cache...onCreate");
+        // 创建缓存表
+        db.execute(
+            "CREATE TABLE IF NOT EXISTS HttpCacheObj(cacheKey TEXT PRIMARY KEY, cacheValue TEXT NOT NULL, expireTime INTEGER NOT NULL, updateTime INTEGER NOT NULL)");
 
-      // 删除过期数据
-      db.execute(
-          "DELETE FROM HttpCacheObj WHERE expireTime <= ${DateTime.now().millisecondsSinceEpoch}");
-    }).then((db) {
-      _database = db;
-    }, onError: (e) {
-      Log.d(e.toString());
-    }).catchError((e) {
-      return e;
-    });
+        // 删除过期数据
+        db.execute(
+            "DELETE FROM HttpCacheObj WHERE expireTime <= ${DateTime.now().millisecondsSinceEpoch}");
+      }).then((db) {
+        _database = db;
+      }, onError: (e) {
+        Log.d(e.toString());
+      }).catchError((e) {
+        return e;
+      });
+    }
   }
 
   static CacheManager getInstance() {

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-class ClickableContainer extends Container {
+class SimpleWidget extends Container {
   final GestureTapCallback? onTap;
 
-  ClickableContainer(
+  SimpleWidget(
       {super.key,
       super.alignment,
       super.padding,

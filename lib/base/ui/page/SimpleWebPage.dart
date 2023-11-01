@@ -2,15 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_demo/base/extension/StringExtension.dart';
 import 'package:flutter_demo/base/ui/page/BaseMultiStatePage.dart';
+import 'package:flutter_demo/base/ui/widget/web/WebViewFunction.dart';
+import 'package:flutter_demo/base/ui/widget/web/WebViewPlatform.dart';
 import 'package:flutter_demo/base/vm/BaseMultiVM.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:webview_flutter/webview_flutter.dart';
-
-import '../../util/Log.dart';
 
 class SimpleWebPage extends BaseMultiPage<_SimpleWebVM> {
   SimpleWebPage({super.key, required String url, String? title})
-      : super(viewModel: _SimpleWebVM(url: url, title: title));
+      : super(viewModel: _SimpleWebVM(firstUrl: url, title: title));
 
   @override
   State<StatefulWidget> createState() => _SimpleWebState();
@@ -20,47 +18,29 @@ class _SimpleWebState extends BaseMultiPageState<_SimpleWebVM, SimpleWebPage> {
   @override
   Widget createMultiContentWidget(
       BuildContext context, _SimpleWebVM viewModel) {
-    return WebViewWidget(controller: viewModel.controller);
+    return WebViewPlatform(
+      firstUrl: viewModel.firstUrl,
+      function: viewModel.function,
+      onPageStarted: (url, title) {
+        viewModel.onPageStarted(url, title);
+      },
+      onPageFinished: (url, title) {},
+    );
   }
 }
 
 class _SimpleWebVM extends BaseMultiVM {
+  final String firstUrl;
   final String? title;
-  String _currUrl;
+  final WebViewFunction function = WebViewFunction();
 
-  _SimpleWebVM({required String url, this.title}) : _currUrl = url;
-
-  late final WebViewController controller;
-
-  @override
-  void init(BuildContext context) {
-    super.init(context);
-    controller = WebViewController()
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(const Color(0xfff2f2f2))
-      ..setNavigationDelegate(NavigationDelegate(onPageStarted: (url) async {
-        _currUrl = url;
-        appbarController.appbarTitle = await controller.getTitle();
-        showLoadingState(loadingTxt: "Loading...");
-      }, onPageFinished: (url) async {
-        appbarController.appbarTitle = await controller.getTitle();
-        if (!url.startsWith("http://") && !url.startsWith("https://")) {
-          await url.launch();
-          if (url == await controller.currentUrl()) {
-            await controller.goBack();
-          } else {
-            await controller.reload();
-          }
-        } else {
-          showContentState();
-        }
-      }));
-  }
+  _SimpleWebVM({required this.firstUrl, this.title});
 
   @override
   void onCreate() {
     super.onCreate();
     appbarController.appbarTitle = title;
+
     appbarController.appbarActions = [
       GestureDetector(
         onTap: () {
@@ -76,14 +56,15 @@ class _SimpleWebVM extends BaseMultiVM {
         ),
       )
     ];
-
-    loadWebUrl();
   }
 
   @override
   Future<bool> onBackPressed() async {
-    if (await controller.canGoBack()) {
-      controller.goBack();
+    if (await function.canGoBack()) {
+      var goBack = await function.goBack();
+      if (!goBack) {
+        return super.onBackPressed();
+      }
       return false;
     }
     return super.onBackPressed();
@@ -91,15 +72,25 @@ class _SimpleWebVM extends BaseMultiVM {
 
   @override
   void onRetry() {
-    loadWebUrl();
+    function.reload();
   }
 
-  /// 加载当前网页地址
-  void loadWebUrl() {
-    try {
-      controller.loadRequest(Uri.parse(_currUrl));
-    } catch (e) {
-      Log.d("loadRequest failed", error: e);
+  void onPageStarted(String url, String? title) {
+    appbarController.appbarTitle = title;
+    showLoadingState(loadingTxt: "Loading...");
+  }
+
+  void onPageFinished(String url, String? title) async {
+    appbarController.appbarTitle = title;
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+      await url.launch();
+      if (url == await function.currentUrl()) {
+        await function.goBack();
+      } else {
+        await function.reload();
+      }
+    } else {
+      showContentState();
     }
   }
 }

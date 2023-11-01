@@ -31,17 +31,17 @@ abstract class BaseVM {
 
   /// onCreate生命周期
   void onCreate() {
-    Log.d("$_className: onCreate...");
+    // Log.d("$_className: onCreate...");
   }
 
   /// onResume生命周期
   void onResume() {
-    Log.d("$_className: onResume...");
+    // Log.d("$_className: onResume...");
   }
 
   /// onPause生命周期
   void onPause() {
-    Log.d("$_className: onPause...");
+    // Log.d("$_className: onPause...");
   }
 
   /// onDestroy生命周期
@@ -50,7 +50,7 @@ abstract class BaseVM {
     onShowLoading = null;
     onDismissLoading = null;
     _cancelRequests();
-    Log.d("$_className: onDestroy...");
+    // Log.d("$_className: onDestroy...");
   }
 
   /// 返回按钮点击
