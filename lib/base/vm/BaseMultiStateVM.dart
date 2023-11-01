@@ -7,7 +7,7 @@ import '../http/exception/CstHttpException.dart';
 import '../model/AppbarController.dart';
 import '../model/BaseResp.dart';
 
-abstract class BaseMultiVM extends BaseVM {
+abstract class BaseMultiStateVM extends BaseVM {
   // 页面状态
   final ViewStateController stateController = ViewStateController();
   final AppbarController appbarController = AppbarController();

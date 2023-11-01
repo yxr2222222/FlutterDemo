@@ -5,11 +5,11 @@ import 'package:flutter_demo/base/ui/widget/SimpleWidget.dart';
 import 'package:flutter_demo/base/util/GetBuilderUtil.dart';
 import 'package:flutter_demo/base/util/Log.dart';
 
-import 'base/ui/page/BaseMultiStatePage.dart';
-import 'base/vm/BaseMultiVM.dart';
+import 'base/ui/page/BaseMultiStateWidget.dart';
+import 'base/vm/BaseMultiStateVM.dart';
 import 'model/app_update.dart';
 
-class HttpTestWidget extends BaseMultiPage<_HttpTestVM> {
+class HttpTestWidget extends BaseMultiStateWidget<_HttpTestVM> {
   HttpTestWidget({super.key}) : super(viewModel: _HttpTestVM());
 
   @override
@@ -17,7 +17,7 @@ class HttpTestWidget extends BaseMultiPage<_HttpTestVM> {
 }
 
 class _HttpTestWidgetState
-    extends BaseMultiPageState<_HttpTestVM, HttpTestWidget> {
+    extends BaseMultiStateWidgetState<_HttpTestVM, HttpTestWidget> {
   @override
   Widget createMultiContentWidget(BuildContext context, _HttpTestVM viewModel) {
     return Column(
@@ -49,7 +49,7 @@ class _HttpTestWidgetState
   }
 }
 
-class _HttpTestVM extends BaseMultiVM {
+class _HttpTestVM extends BaseMultiStateVM {
   final SimpleGetxController<AppUpdate> appUpdate = SimpleGetxController();
   final SimpleGetxController<String> stateTxt = SimpleGetxController("检查更新");
   late AppUpdateApi appUpdateApi;

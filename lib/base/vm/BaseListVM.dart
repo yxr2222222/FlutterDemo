@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_demo/base/vm/BaseMultiVM.dart';
+import 'package:flutter_demo/base/vm/BaseMultiStateVM.dart';
 
 import '../model/SimpleGetxController.dart';
 import '../ui/widget/BaseItemWidget.dart';
 import '../util/GetBuilderUtil.dart';
 
-abstract class BaseListVM<T> extends BaseMultiVM {
+abstract class BaseListVM<T> extends BaseMultiStateVM {
   final SimpleGetxController<List<T>> itemListController =
       SimpleGetxController([]);
 

@@ -7,13 +7,13 @@ import 'package:visibility_detector/visibility_detector.dart';
 
 import '../widget/DefaultLoadingDialog.dart';
 
-abstract class BasePage<VM extends BaseVM> extends StatefulWidget {
+abstract class BaseWidget<VM extends BaseVM> extends StatefulWidget {
   final VM viewModel;
 
-  const BasePage({super.key, required this.viewModel});
+  const BaseWidget({super.key, required this.viewModel});
 }
 
-abstract class BasePageState<VM extends BaseVM, W extends BasePage<VM>>
+abstract class BaseWidgetState<VM extends BaseVM, W extends BaseWidget<VM>>
     extends State<W> with AutomaticKeepAliveClientMixin {
   late VM _viewModel;
 
@@ -57,8 +57,6 @@ abstract class BasePageState<VM extends BaseVM, W extends BasePage<VM>>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    // 初始化ViewModel
-    viewModel.init(context);
     this._context = context;
     return WillPopScope(
         child: VisibilityDetector(
@@ -93,6 +91,8 @@ abstract class BasePageState<VM extends BaseVM, W extends BasePage<VM>>
     if (!_created) {
       _created = true;
 
+      // 初始化ViewModel
+      viewModel.init(context);
       // 设置展示loading的方法
       viewModel.onShowLoading = (String? loadingTxt, Color barrierColor,
           bool barrierDismissible, bool cancelable) {
