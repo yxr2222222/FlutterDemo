@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_demo/base/vm/BaseMultiStateVM.dart';
+import 'package:flutter_demo/base/vm/BaseMultiVM.dart';
 import 'package:flutter_demo/tab/BasketPage.dart';
 import 'package:flutter_demo/tab/HomePage.dart';
 import 'package:flutter_demo/tab/KindPage.dart';
 import 'package:flutter_demo/tab/MinePage.dart';
 
-import '../base/ui/page/BaseMultiStateWidget.dart';
+import '../base/ui/page/BaseMultiStatePage.dart';
 import '../base/ui/widget/BottomNavigationBarViewPager.dart';
 
-class ViewPagerTest extends BaseMultiStateWidget<_ViewPagerVM> {
+class ViewPagerTest extends BaseMultiPage<_ViewPagerVM> {
   ViewPagerTest({super.key}) : super(viewModel: _ViewPagerVM());
 
   @override
@@ -16,7 +16,7 @@ class ViewPagerTest extends BaseMultiStateWidget<_ViewPagerVM> {
 }
 
 class _ViewPagerTestState
-    extends BaseMultiStateWidgetState<_ViewPagerVM, ViewPagerTest> {
+    extends BaseMultiPageState<_ViewPagerVM, ViewPagerTest> {
   @override
   Widget createMultiContentWidget(BuildContext context, _ViewPagerVM viewModel) {
     List<ViewPagerData> viewPagerDataList = [
@@ -46,7 +46,7 @@ class _ViewPagerTestState
   }
 }
 
-class _ViewPagerVM extends BaseMultiStateVM {
+class _ViewPagerVM extends BaseMultiVM {
   @override
   void onCreate() {
     super.onCreate();
