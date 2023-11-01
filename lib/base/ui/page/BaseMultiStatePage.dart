@@ -4,16 +4,16 @@ import 'package:flutter_demo/base/model/ViewStateController.dart';
 import 'package:flutter_demo/base/model/em/ViewState.dart';
 
 import '../../util/GetBuilderUtil.dart';
-import '../../vm/BaseMultiStateVM.dart';
-import 'BaseWidget.dart';
+import '../../vm/BaseMultiVM.dart';
+import 'BasePage.dart';
 
-abstract class BaseMultiStateWidget<VM extends BaseMultiStateVM>
-    extends BaseWidget<VM> {
-  const BaseMultiStateWidget({super.key, required super.viewModel});
+abstract class BaseMultiPage<VM extends BaseMultiVM>
+    extends BasePage<VM> {
+  const BaseMultiPage({super.key, required super.viewModel});
 }
 
-abstract class BaseMultiStateWidgetState<VM extends BaseMultiStateVM,
-    T extends BaseMultiStateWidget<VM>> extends BaseWidgetState<VM, T> {
+abstract class BaseMultiPageState<VM extends BaseMultiVM,
+    T extends BaseMultiPage<VM>> extends BasePageState<VM, T> {
   Widget? _contentView, _loadingView, _errorView, _emptyView;
 
   @override

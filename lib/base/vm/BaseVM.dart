@@ -54,7 +54,7 @@ abstract class BaseVM {
   }
 
   /// 返回按钮点击
-  bool onBackPressed() {
+  Future<bool> onBackPressed() async {
     if (_context != null) {
       _context?.pop();
       return true;

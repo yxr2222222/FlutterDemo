@@ -4,16 +4,16 @@ import 'package:flutter_demo/base/model/PageResult.dart';
 import 'package:flutter_demo/base/vm/BasePageListVM.dart';
 
 import 'api/TestPageDataApi.dart';
-import 'base/ui/page/BaseMultiStateWidget.dart';
+import 'base/ui/page/BaseMultiStatePage.dart';
 
-class RefreshLoadTestWidget extends BaseMultiStateWidget<_RefreshLoadTestVM> {
+class RefreshLoadTestWidget extends BaseMultiPage<_RefreshLoadTestVM> {
   RefreshLoadTestWidget({super.key}) : super(viewModel: _RefreshLoadTestVM());
 
   @override
   State<StatefulWidget> createState() => _RefreshLoadTestWidgetState();
 }
 
-class _RefreshLoadTestWidgetState extends BaseMultiStateWidgetState<
+class _RefreshLoadTestWidgetState extends BaseMultiPageState<
     _RefreshLoadTestVM, RefreshLoadTestWidget> {
   @override
   Widget createMultiContentWidget(

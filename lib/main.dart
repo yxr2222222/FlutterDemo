@@ -4,17 +4,19 @@ import 'package:flutter_demo/RefreshLoadTestWidget.dart';
 import 'package:flutter_demo/base/extension/BuildContextExtension.dart';
 import 'package:flutter_demo/base/http/cache/CacheConfig.dart';
 import 'package:flutter_demo/base/model/PermissionReq.dart';
+import 'package:flutter_demo/base/ui/page/SimpleWebPage.dart';
 import 'package:flutter_demo/base/vm/BaseListVM.dart';
 import 'package:flutter_demo/tab/ViewPagerTest.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'base/http/HttpManager.dart';
 import 'base/http/model/BaseRespConfig.dart';
-import 'base/ui/page/BaseMultiStateWidget.dart';
+import 'base/ui/page/BaseMultiStatePage.dart';
 
 void main() {
   /// 在main函数第一行添加这句话
   WidgetsFlutterBinding.ensureInitialized();
+
   /// 初始化网络请求配置
   HttpManager.getInstance().init(
       baseUrl: "http://192.168.1.116:8089/",
@@ -41,17 +43,17 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class _MyHomePage extends BaseMultiStateWidget<_MyHomePageVM> {
+class _MyHomePage extends BaseMultiPage<_MyHomePageVM> {
   _MyHomePage() : super(viewModel: _MyHomePageVM());
 
   @override
   State<_MyHomePage> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState
-    extends BaseMultiStateWidgetState<_MyHomePageVM, _MyHomePage> {
+class _MyHomePageState extends BaseMultiPageState<_MyHomePageVM, _MyHomePage> {
   @override
-  Widget createMultiContentWidget(BuildContext context, _MyHomePageVM viewModel) {
+  Widget createMultiContentWidget(
+      BuildContext context, _MyHomePageVM viewModel) {
     return viewModel.listBuilder(
       onItemClick: (item, context) {
         if (_MyHomePageVM.API == item.item.title) {
@@ -67,6 +69,11 @@ class _MyHomePageState
           context.push(RefreshLoadTestWidget());
         } else if (_MyHomePageVM.VIEW_PAGER == item.item.title) {
           context.push(ViewPagerTest());
+        } else if (_MyHomePageVM.WEB_VIEW == item.item.title) {
+          context.push(SimpleWebPage(
+            url: "http://www.baidu.com",
+            title: "WebView示例",
+          ));
         }
       },
       childItemBuilder: (itemWidget, context) {
@@ -90,6 +97,7 @@ class _MyHomePageVM extends BaseListVM<MainTitle> {
   static const String REFRESH = "下拉刷新/上拉加载";
   static const String PERMISSION = "权限申请";
   static const String VIEW_PAGER = "ViewPager";
+  static const String WEB_VIEW = "WebView";
 
   @override
   void onCreate() {
@@ -102,12 +110,13 @@ class _MyHomePageVM extends BaseListVM<MainTitle> {
       MainTitle(API),
       MainTitle(REFRESH),
       MainTitle(PERMISSION),
-      MainTitle(VIEW_PAGER)
+      MainTitle(VIEW_PAGER),
+      MainTitle(WEB_VIEW),
     ]);
   }
 
   @override
-  bool onBackPressed() => false;
+  Future<bool> onBackPressed() async => false;
 }
 
 class MainTitle {

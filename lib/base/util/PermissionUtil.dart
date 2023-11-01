@@ -1,14 +1,20 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_demo/base/extension/BuildContextExtension.dart';
+import 'package:flutter_demo/base/extension/ObjectExtension.dart';
 import 'package:flutter_demo/base/util/Log.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../model/PermissionReq.dart';
 
 class PermissionUtil {
-  /// 申请权限，TODO: 除了移动端如何处理？
+  /// 申请权限，除了移动端直接返回成功
   static void requestPermission(
       BuildContext context, PermissionReq permissionReq) async {
+    if (!context.isAndroid() && !context.isIOS()) {
+      // 如果不是Android端且不是iOS端，则默认走有权限回调
+      _onGranted(permissionReq.onGranted);
+      return;
+    }
     var permissions = permissionReq.permissions;
     if (permissions.isEmpty) {
       _onGranted(permissionReq.onGranted);
