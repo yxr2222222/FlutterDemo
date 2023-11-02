@@ -2,28 +2,20 @@ import 'dart:html';
 import 'dart:ui_web' as ui;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_demo/base/ui/widget/web/IWebViewFunction.dart';
-import 'package:flutter_demo/base/util/Log.dart';
 
 import 'WebViewFunction.dart';
 
 class WebView extends StatelessWidget implements IWebViewFunction {
   static const String _id = "iframe-webview";
-  final void Function(String url, String? title)? onPageStarted;
-  final void Function(String url, String? title)? onPageFinished;
-  final WebViewFunction? function;
+  final WebViewFunction function;
   final String firstUrl;
   IFrameElement? _iFrameElement;
 
-  WebView(
-      {super.key,
-      required this.firstUrl,
-      this.function,
-      this.onPageStarted,
-      this.onPageFinished});
+  WebView({super.key, required this.firstUrl, required this.function});
 
   @override
   Widget build(BuildContext context) {
-    function?.function = this;
+    function.init(this);
 
     // 注册
     ui.platformViewRegistry.registerViewFactory(_id, (int viewId) {
@@ -42,7 +34,9 @@ class WebView extends StatelessWidget implements IWebViewFunction {
           onPlatformViewCreated: (int viewId) {
             _iFrameElement =
                 ui.platformViewRegistry.getViewById(viewId) as IFrameElement?;
-            _iFrameElement?.src = firstUrl;
+            if (!function.firstLoad) {
+              _iFrameElement?.src = firstUrl;
+            }
           },
         ));
   }
@@ -75,5 +69,14 @@ class WebView extends StatelessWidget implements IWebViewFunction {
   @override
   Future<String?> currentUrl() async {
     return firstUrl;
+  }
+
+  @override
+  Future<bool> loadUrl({required String url}) async {
+    if (_iFrameElement != null) {
+      _iFrameElement!.src = url;
+      return true;
+    }
+    return false;
   }
 }

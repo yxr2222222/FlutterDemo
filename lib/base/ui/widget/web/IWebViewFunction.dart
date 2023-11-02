@@ -1,4 +1,6 @@
 abstract interface class IWebViewFunction {
+  Future<bool> loadUrl({required String url});
+
   Future<bool> canGoBack();
 
   Future<bool> goBack();

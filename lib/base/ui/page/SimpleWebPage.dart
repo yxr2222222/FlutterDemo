@@ -19,20 +19,14 @@ class _SimpleWebState extends BaseMultiPageState<_SimpleWebVM, SimpleWebPage> {
   Widget createMultiContentWidget(
       BuildContext context, _SimpleWebVM viewModel) {
     return WebViewPlatform(
-      firstUrl: viewModel.firstUrl,
-      function: viewModel.function,
-      onPageStarted: (url, title) {
-        viewModel.onPageStarted(url, title);
-      },
-      onPageFinished: (url, title) {},
-    );
+        firstUrl: viewModel.firstUrl, function: viewModel.initFunction());
   }
 }
 
 class _SimpleWebVM extends BaseMultiVM {
   final String firstUrl;
   final String? title;
-  final WebViewFunction function = WebViewFunction();
+  WebViewFunction? _function;
 
   _SimpleWebVM({required this.firstUrl, this.title});
 
@@ -56,12 +50,14 @@ class _SimpleWebVM extends BaseMultiVM {
         ),
       )
     ];
+
+    _function?.loadUrl(url: firstUrl);
   }
 
   @override
   Future<bool> onBackPressed() async {
-    if (await function.canGoBack()) {
-      var goBack = await function.goBack();
+    if (_function != null && await _function!.canGoBack()) {
+      var goBack = await _function!.goBack();
       if (!goBack) {
         return super.onBackPressed();
       }
@@ -72,7 +68,19 @@ class _SimpleWebVM extends BaseMultiVM {
 
   @override
   void onRetry() {
-    function.reload();
+    _function?.reload();
+  }
+
+  WebViewFunction initFunction() {
+    _function ??= WebViewFunction(
+        onPageStarted: (url, title) {
+          onPageStarted(url, title);
+        },
+        onPageFinished: (url, title) {
+          onPageFinished(url, title);
+        },
+      );
+    return _function!;
   }
 
   void onPageStarted(String url, String? title) {
@@ -84,10 +92,10 @@ class _SimpleWebVM extends BaseMultiVM {
     appbarController.appbarTitle = title;
     if (!url.startsWith("http://") && !url.startsWith("https://")) {
       await url.launch();
-      if (url == await function.currentUrl()) {
-        await function.goBack();
+      if (url == await _function?.currentUrl()) {
+        await _function?.goBack();
       } else {
-        await function.reload();
+        await _function?.reload();
       }
     } else {
       showContentState();

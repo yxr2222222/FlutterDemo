@@ -15,4 +15,12 @@ extension ObjectExtension on String {
     }
     return false;
   }
+
+  Future<Uri?> parseUri() async {
+    try {
+      return Uri.parse(this);
+    } catch (e) {
+      return null;
+    }
+  }
 }

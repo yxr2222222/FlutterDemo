@@ -71,7 +71,7 @@ class _MyHomePageState extends BaseMultiPageState<_MyHomePageVM, _MyHomePage> {
           context.push(ViewPagerTest());
         } else if (_MyHomePageVM.WEB_VIEW == item.item.title) {
           context.push(SimpleWebPage(
-            url: "https://dibisi.top/",
+            url: "https://www.aliyun.com/",
             title: "WebView示例",
           ));
         }
