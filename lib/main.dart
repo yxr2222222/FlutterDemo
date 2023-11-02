@@ -1,24 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_demo/HttpTestWidget.dart';
-import 'package:flutter_demo/RefreshLoadTestWidget.dart';
 import 'package:flutter_demo/base/extension/BuildContextExtension.dart';
 import 'package:flutter_demo/base/http/cache/CacheConfig.dart';
-import 'package:flutter_demo/base/model/PermissionReq.dart';
-import 'package:flutter_demo/base/ui/page/SimpleWebPage.dart';
-import 'package:flutter_demo/base/vm/BaseListVM.dart';
-import 'package:flutter_demo/tab/ViewPagerTest.dart';
+import 'package:flutter_demo/base/ui/page/SimpleSplashPage.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'FunctionListPage.dart';
 import 'base/http/HttpManager.dart';
 import 'base/http/model/BaseRespConfig.dart';
-import 'base/ui/page/BaseMultiStatePage.dart';
 
-void main() {
-  /// 在main函数第一行添加这句话
-  WidgetsFlutterBinding.ensureInitialized();
-
+void main() async {
   /// 初始化网络请求配置
-  HttpManager.getInstance().init(
+  await HttpManager.getInstance().init(
       baseUrl: "http://192.168.1.116:8089/",
       cacheConfig: CacheConfig(),
       debug: true,
@@ -38,90 +29,23 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: _MyHomePage(),
+      home: SimpleSplashPage(
+        privacyContent: PrivacyContent(
+            "我们深知个人信息对您的重要性，为了给您更好的服务，您只须提供必要的信息，我们将依据国家法律法规尽全力保护您的隐私安全，同时恪守以下原则：权责一致、目的明确、选择同意、最少够用、确保安全、主体参与、公开透明。在使用APP前，请仔细阅读并同意本《用户协议》《隐私协议》。",
+            [
+              KeywordUrl("《用户协议》", "https://www.aliyun.com/"),
+              KeywordUrl("《隐私协议》", "https://zhuanlan.zhihu.com/"),
+            ]),
+        onPrivacyAgree: (viewModel, context) async {
+          viewModel.showLoading();
+          Future.delayed(const Duration(seconds: 1), () {
+            viewModel.dismissLoading();
+            context.push(FunctionListPage(), finishCurr: true);
+          });
+        },
+        icon: "images/icon_logo.png",
+        title: "FlutterDemo",
+      ),
     );
   }
-}
-
-class _MyHomePage extends BaseMultiPage<_MyHomePageVM> {
-  _MyHomePage() : super(viewModel: _MyHomePageVM());
-
-  @override
-  State<_MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends BaseMultiPageState<_MyHomePageVM, _MyHomePage> {
-  @override
-  Widget createMultiContentWidget(
-      BuildContext context, _MyHomePageVM viewModel) {
-    return viewModel.listBuilder(
-      onItemClick: (item, context) {
-        if (_MyHomePageVM.API == item.item.title) {
-          context.push(HttpTestWidget());
-        } else if (_MyHomePageVM.PERMISSION == item.item.title) {
-          viewModel.requestPermission(PermissionReq(
-              [Permission.camera, Permission.location], onGranted: () {
-            showToast("权限申请成功");
-          }, onDenied: (isPermanentlyDenied) {
-            showToast("权限申请失败,是否被多次拒绝或永久拒绝: $isPermanentlyDenied");
-          }));
-        } else if (_MyHomePageVM.REFRESH == item.item.title) {
-          context.push(RefreshLoadTestWidget());
-        } else if (_MyHomePageVM.VIEW_PAGER == item.item.title) {
-          context.push(ViewPagerTest());
-        } else if (_MyHomePageVM.WEB_VIEW == item.item.title) {
-          context.push(SimpleWebPage(
-            url: "https://www.aliyun.com/",
-            title: "WebView示例",
-          ));
-        }
-      },
-      childItemBuilder: (itemWidget, context) {
-        return Container(
-            width: double.infinity,
-            height: 48,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(color: itemWidget.item.background),
-            margin: const EdgeInsets.only(top: 0.5),
-            child: Text(
-              itemWidget.item.title,
-              style: const TextStyle(fontSize: 16, color: Color(0xff333333)),
-            ));
-      },
-    );
-  }
-}
-
-class _MyHomePageVM extends BaseListVM<MainTitle> {
-  static const String API = "API请求示例";
-  static const String REFRESH = "下拉刷新/上拉加载";
-  static const String PERMISSION = "权限申请";
-  static const String VIEW_PAGER = "ViewPager";
-  static const String WEB_VIEW = "WebView";
-
-  @override
-  void onCreate() {
-    super.onCreate();
-
-    appbarController.appbarBackIcon = null;
-    appbarController.appbarTitle = "FlutterDemo";
-
-    refreshData(isClear: true, dataList: [
-      MainTitle(API),
-      MainTitle(REFRESH),
-      MainTitle(PERMISSION),
-      MainTitle(VIEW_PAGER),
-      MainTitle(WEB_VIEW),
-    ]);
-  }
-
-  @override
-  Future<bool> onBackPressed() async => false;
-}
-
-class MainTitle {
-  final String title;
-  Color background = Colors.white;
-
-  MainTitle(this.title);
 }

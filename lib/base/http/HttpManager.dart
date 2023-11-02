@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_demo/base/extension/ObjectExtension.dart';
 import 'package:flutter_demo/base/http/cache/CacheMode.dart';
 import 'package:flutter_demo/base/http/cache/CacheStrategy.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_demo/base/http/cache/HttpCacheInterceptor.dart';
 import 'package:flutter_demo/base/http/interceptor/RequestInterceptor.dart';
 import 'package:flutter_demo/base/util/Log.dart';
 import '../model/BaseResp.dart';
+import '../util/StorageUtil.dart';
 import 'cache/CacheConfig.dart';
 import 'cache/CacheManager.dart';
 import 'exception/CstHttpException.dart';
@@ -35,6 +37,7 @@ class HttpManager {
   /// 私有的命名构造函数
   HttpManager._internal() {
     BaseOptions options = BaseOptions();
+
     _dio = Dio(options);
   }
 
@@ -43,7 +46,7 @@ class HttpManager {
   }
 
   /// 初始化
-  void init(
+  Future<bool> init(
       {required String baseUrl,
       bool debug = false,
       BaseRespConfig? respConfig,
@@ -52,7 +55,13 @@ class HttpManager {
       Map<String, dynamic>? publicHeaders,
       Map<String, dynamic>? publicQueryParams,
       CacheConfig? cacheConfig,
-      List<Interceptor>? interceptors}) {
+      List<Interceptor>? interceptors}) async {
+
+    WidgetsFlutterBinding.ensureInitialized();
+
+    // 初始化k-v持久化存储
+    await StorageUtil.init();
+
     _debug = debug;
     _respConfig = respConfig ?? BaseRespConfig();
     publicHeaders?.forEach((key, value) {
@@ -89,6 +98,8 @@ class HttpManager {
       CacheManager.getInstance().init();
       _dio.interceptors.add(HttpCacheInterceptor(cacheConfig));
     }
+
+    return true;
   }
 
   /// 清空当前请求头

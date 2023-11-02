@@ -5,6 +5,8 @@ import 'package:get/get_state_manager/src/simple/get_state.dart';
 import '../model/BaseGetxController.dart';
 
 class GetBuilderUtil {
+  GetBuilderUtil._internal();
+
   static StatefulWidget builder<T extends BaseGetxController>(
       OnGetBuilder<T> onGetBuilder,
       {required T? init, String? id}) {

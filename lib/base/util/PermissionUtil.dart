@@ -7,6 +7,8 @@ import 'package:permission_handler/permission_handler.dart';
 import '../model/PermissionReq.dart';
 
 class PermissionUtil {
+  PermissionUtil._internal();
+
   /// 申请权限，除了移动端直接返回成功
   static void requestPermission(
       BuildContext context, PermissionReq permissionReq) async {

@@ -12,7 +12,7 @@ class AppbarController extends BaseGetxController {
     update();
   }
 
-  // appbar 标题
+  /// appbar 标题
   String? _appbarTitle;
 
   String? get appbarTitle => _appbarTitle;
@@ -22,7 +22,7 @@ class AppbarController extends BaseGetxController {
     update();
   }
 
-  // appbar 标题样式
+  /// appbar 标题样式
   TextStyle? _appbarTitleStyle = const TextStyle(
       fontSize: 18, color: Color(0xff333333), fontWeight: FontWeight.bold);
 
@@ -33,7 +33,7 @@ class AppbarController extends BaseGetxController {
     update();
   }
 
-  // appbar 背景颜色
+  /// appbar 背景颜色
   Color? _appbarBackgroundColor = Colors.white;
 
   Color? get appbarBackgroundColor => _appbarBackgroundColor;
@@ -53,7 +53,7 @@ class AppbarController extends BaseGetxController {
     update();
   }
 
-  // appbar 右边操作控件列表
+  /// appbar 右边操作控件列表
   List<Widget>? _appbarActions;
 
   List<Widget>? get appbarActions => _appbarActions;
