@@ -90,6 +90,7 @@ class HttpCacheInterceptor extends Interceptor {
     return super.onError(err, handler);
   }
 
+  /// 获取到了缓存，构建缓存返回结果
   Response _buildResponse(HttpCacheObj obj, RequestOptions options) {
     options = options.copyWith(
       extra: {
@@ -102,8 +103,8 @@ class HttpCacheInterceptor extends Interceptor {
         statusCode: 200);
   }
 
+  /// 获取缓存类型
   CacheMode _getCacheMode(RequestOptions options) {
-    return options.extra[CacheStrategy.CACHE_MODE] ??
-        cacheConfig.defaultCacheMode;
+    return options.extra[CacheStrategy.CACHE_MODE] ?? CacheMode.ONLY_NETWORK;
   }
 }

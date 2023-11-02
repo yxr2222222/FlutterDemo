@@ -29,7 +29,7 @@ extension StringExtension on String {
     }
   }
 
-  /// 查找字符串中所有keyword的下标
+  /// 查找字符串中所有[keyword]的下标，返回下标集合
   List<KeyWordIndex> indexOfList(String keyword) {
     List<KeyWordIndex> occurrences = [];
     int index = 0;
@@ -45,8 +45,16 @@ extension StringExtension on String {
     return occurrences;
   }
 
-  /// 根据关键字创建关键字可点击的富文本widget
-  Text clickableRichText(
+  /// 根据关键字创建关键字高亮可点击的富文本widget
+  /// [keywords] 需要高亮可点击的关键字列表
+  /// [textColor] 文本颜色，默认是黑色
+  /// [highColor] 高亮文本颜色，默认是蓝色
+  /// [fontSize] 文本的大小，默认是12
+  /// [keywordFontSize] 高亮文本大小，默认是[fontSize]大小
+  /// [fontWeight] 文本的字体权重，默认是[FontWeight.normal]
+  /// [keywordFontWeight] 高亮文本的字体权重，默认是[fontWeight]
+  /// [onKeywordTap] 高亮文本点击方法回调
+  Text highLightClickableRichText(
       {required List<String> keywords,
       Color textColor = Colors.black,
       Color highColor = Colors.blue,
@@ -54,7 +62,7 @@ extension StringExtension on String {
       double? keywordFontSize,
       FontWeight fontWeight = FontWeight.normal,
       FontWeight? keywordFontWeight,
-      required void Function(String keyword) onTap}) {
+      void Function(String keyword)? onKeywordTap}) {
     keywordFontSize = keywordFontSize ?? fontSize;
     keywordFontWeight = keywordFontWeight ?? fontWeight;
 
@@ -80,16 +88,23 @@ extension StringExtension on String {
               color: textColor, fontWeight: fontWeight, fontSize: fontSize)));
 
       var keyword = keywordIndex.keyword;
+
+      TapGestureRecognizer? recognizer = onKeywordTap == null
+          ? null
+          : (TapGestureRecognizer()
+            ..onTap = () {
+              onKeywordTap(keyword);
+            });
+
       textSpanList.add(TextSpan(
           text: keyword,
           style: TextStyle(
               color: highColor,
               fontWeight: keywordFontWeight,
               fontSize: keywordFontSize),
-          recognizer: TapGestureRecognizer()
-            ..onTap = () {
-              onTap(keyword);
-            }));
+          recognizer: recognizer));
+
+      startIndex = startIndex + keywordIndex.keyword.length;
     }
 
     return Text.rich(

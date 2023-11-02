@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_demo/base/model/AppbarController.dart';
-import 'package:flutter_demo/base/model/ViewStateController.dart';
+import 'package:flutter_demo/base/model/controller/AppbarController.dart';
+import 'package:flutter_demo/base/model/controller/ViewStateController.dart';
 import 'package:flutter_demo/base/model/em/ViewState.dart';
 
 import '../../util/GetBuilderUtil.dart';
 import '../../vm/BaseMultiVM.dart';
 import 'BasePage.dart';
 
-abstract class BaseMultiPage<VM extends BaseMultiVM>
-    extends BasePage<VM> {
-  const BaseMultiPage({super.key, required super.viewModel});
+abstract class BaseMultiPage<VM extends BaseMultiVM> extends BasePage<VM> {
+  BaseMultiPage({super.key, required super.viewModel});
 }
 
 abstract class BaseMultiPageState<VM extends BaseMultiVM,
@@ -30,7 +29,7 @@ abstract class BaseMultiPageState<VM extends BaseMultiVM,
               (controller) => _buildWidget(context, viewModel, controller),
               init: viewModel.stateController)));
 
-  ///根据不同状态来显示不同的视图
+  /// 根据不同状态来显示不同的视图
   Widget _buildWidget(
       BuildContext context, VM viewModel, ViewStateController controller) {
     switch (controller.viewState) {

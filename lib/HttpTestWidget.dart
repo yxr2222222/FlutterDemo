@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/api/AppUpdateApi.dart';
-import 'package:flutter_demo/base/model/SimpleGetxController.dart';
+import 'package:flutter_demo/base/model/controller/SimpleGetxController.dart';
 import 'package:flutter_demo/base/ui/widget/SimpleWidget.dart';
 import 'package:flutter_demo/base/util/GetBuilderUtil.dart';
 import 'package:flutter_demo/base/util/Log.dart';

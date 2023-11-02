@@ -20,4 +20,9 @@ class _BasketPageState extends BasePageState<_BasketVM, BasketPage> {
   bool get wantKeepAlive => true;
 }
 
-class _BasketVM extends BaseVM {}
+class _BasketVM extends BaseVM {
+  @override
+  Future<bool> onBackPressed() async {
+    return false;
+  }
+}

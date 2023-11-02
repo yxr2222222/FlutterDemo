@@ -1,9 +1,9 @@
-import 'package:flutter_demo/base/http/exception/CstHttpException.dart';
+import 'package:flutter_demo/base/http/exception/CstException.dart';
 
 class BaseResp<T> {
   final bool isSuccess;
   final T? data;
-  final CstHttpException? error;
+  final CstException? error;
 
   BaseResp(this.isSuccess, {this.data, this.error});
 }

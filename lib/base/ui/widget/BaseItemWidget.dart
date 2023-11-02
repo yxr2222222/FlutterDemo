@@ -7,6 +7,11 @@ class BaseItemWidget<T> extends StatefulWidget {
   final OnItemClick<T>? onItemClick;
   final int index;
 
+  /// 列表item基础组件
+  /// [childItemBuilder] 交给用户自己构建自定义item样式
+  /// [item] item数据
+  /// [index] 列表中的下标位置
+  /// [onItemClick] item点击方法回调
   const BaseItemWidget(
       {super.key,
       required this.childItemBuilder,

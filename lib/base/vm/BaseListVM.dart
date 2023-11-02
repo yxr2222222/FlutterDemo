@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/base/vm/BaseMultiVM.dart';
 
-import '../model/SimpleGetxController.dart';
+import '../model/controller/SimpleGetxController.dart';
 import '../ui/widget/BaseItemWidget.dart';
 import '../util/GetBuilderUtil.dart';
 

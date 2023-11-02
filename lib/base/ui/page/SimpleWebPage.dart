@@ -7,6 +7,9 @@ import 'package:flutter_demo/base/ui/widget/web/WebViewPlatform.dart';
 import 'package:flutter_demo/base/vm/BaseMultiVM.dart';
 
 class SimpleWebPage extends BaseMultiPage<_SimpleWebVM> {
+  /// 简易的内置Web页面，由于Web端通过iFrame的形式实现，有些功能没有完善
+  /// [url] 网页地址
+  /// [title] appbar标题
   SimpleWebPage({super.key, required String url, String? title})
       : super(viewModel: _SimpleWebVM(firstUrl: url, title: title));
 
@@ -73,13 +76,13 @@ class _SimpleWebVM extends BaseMultiVM {
 
   WebViewFunction initFunction() {
     _function ??= WebViewFunction(
-        onPageStarted: (url, title) {
-          onPageStarted(url, title);
-        },
-        onPageFinished: (url, title) {
-          onPageFinished(url, title);
-        },
-      );
+      onPageStarted: (url, title) {
+        onPageStarted(url, title);
+      },
+      onPageFinished: (url, title) {
+        onPageFinished(url, title);
+      },
+    );
     return _function!;
   }
 

@@ -27,9 +27,7 @@ class CacheManager {
         // 删除过期数据
         db.execute(
             "DELETE FROM HttpCacheObj WHERE expireTime <= ${DateTime.now().millisecondsSinceEpoch}");
-      }).then((db) {
-        _database = db;
-      }, onError: (e) {
+      }).then((db) {}, onError: (e) {
         Log.d(e.toString());
       }).catchError((e) {
         return e;
@@ -41,7 +39,25 @@ class CacheManager {
     return _instance;
   }
 
-  void init() {}
+  Future<bool> init() async {
+    try {
+      var database = await openDatabase("basic_http_cache.db", version: 1,
+          onCreate: (Database db, int version) {
+        Log.d("basic_http_cache...onCreate");
+        // 创建缓存表
+        db.execute(
+            "CREATE TABLE IF NOT EXISTS HttpCacheObj(cacheKey TEXT PRIMARY KEY, cacheValue TEXT NOT NULL, expireTime INTEGER NOT NULL, updateTime INTEGER NOT NULL)");
+
+        // 删除过期数据
+        db.execute(
+            "DELETE FROM HttpCacheObj WHERE expireTime <= ${DateTime.now().millisecondsSinceEpoch}");
+      });
+      _database = database;
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
 
   /// 根据请求获取缓存
   Future<HttpCacheObj?>? getCacheWithReq(RequestOptions options) async {

@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/base/extension/BuildContextExtension.dart';
 import 'package:flutter_demo/base/extension/ObjectExtension.dart';
+import 'package:flutter_demo/base/ui/widget/lifecycle/PageLifecycle.dart';
 import 'package:flutter_demo/base/vm/BaseVM.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
-import '../widget/DefaultLoadingDialog.dart';
+import '../widget/dialog/DefaultLoadingDialog.dart';
 
 abstract class BasePage<VM extends BaseVM> extends StatefulWidget {
   final VM viewModel;
+  final PageLifecycle lifecycle = PageLifecycle();
 
-  const BasePage({super.key, required this.viewModel});
+  BasePage({super.key, required this.viewModel});
 }
 
 abstract class BasePageState<VM extends BaseVM, W extends BasePage<VM>>
@@ -31,27 +33,33 @@ abstract class BasePageState<VM extends BaseVM, W extends BasePage<VM>>
     VisibilityDetectorController.instance.updateInterval = Duration.zero;
     this._viewModel = widget.viewModel;
 
+    // 添加第一次绘制完成监听
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      // 绘制完成之后检查是否需要执行onCreate
       _onCreate(_context);
     });
 
-    super.initState();
-
+    // App的生命监听
     _lifecycleListener = AppLifecycleListener(
       onResume: () {
+        // app从后台转到前台
         _onResume(true);
       },
       onHide: () {
+        // 主要是web、macos这些从前台转到后台
         if (!isAndroid() && !isIOS()) {
           _onPause(true);
         }
       },
       onPause: () {
+        // app从前台转到后台
         if (isAndroid() || isIOS()) {
           _onPause(true);
         }
       },
     );
+
+    super.initState();
   }
 
   @override
@@ -60,10 +68,14 @@ abstract class BasePageState<VM extends BaseVM, W extends BasePage<VM>>
     // 初始化ViewModel
     viewModel.init(context);
     this._context = context;
+    // 添加拦截控制，将backPress交给viewModel.onBackPressed处理
     return WillPopScope(
+      // 添加可见性监听控件，用于处理page的onPause、onResume事件
         child: VisibilityDetector(
             key: UniqueKey(),
+            // 内容控件交由子类自行实现
             child: createContentWidget(context, viewModel),
+            // page可见性回调，用于处理page的onPause、onResume事件
             onVisibilityChanged: (visibilityInfo) {
               var visiblePercentage = visibilityInfo.visibleFraction * 100;
               if (visiblePercentage >= 80) {
@@ -75,20 +87,23 @@ abstract class BasePageState<VM extends BaseVM, W extends BasePage<VM>>
         onWillPop: () => Future(() => viewModel.onBackPressed()));
   }
 
+  /// page是否在dispose前保持存活，默认是false
+  /// 如果你是用类似Android的ViewPager需要ViewPager中某个page因为切换不被销毁即设置成true
   @override
   bool get wantKeepAlive => false;
 
+  /// 组件被销毁
   @override
   void dispose() {
     _lifecycleListener?.dispose();
     dismissLoading();
 
     _onPause(false);
-    viewModel.onDestroy();
-    onDestroy();
+    _onDestroy();
     super.dispose();
   }
 
+  /// onCreate生命周期判断
   void _onCreate(BuildContext context) {
     if (!_created) {
       _created = true;
@@ -109,27 +124,49 @@ abstract class BasePageState<VM extends BaseVM, W extends BasePage<VM>>
 
       onCreate();
       viewModel.onCreate();
+      _forEachLifecycle((listener) {
+        listener.onLifecycle(context, listener.onCreate);
+      });
     }
   }
 
+  /// onResume生命周期判断
   void _onResume(bool isFromLifecycle) {
     if (_created && !_resumed) {
       if (!isFromLifecycle || ModalRoute.of(context)?.isCurrent == true) {
         _resumed = true;
+
         onResume();
         viewModel.onResume();
+        _forEachLifecycle((listener) {
+          listener.onLifecycle(context, listener.onResume);
+        });
       }
     }
   }
 
+  /// onPause生命周期判断
   void _onPause(bool isFromLifecycle) {
     if (_created && _resumed) {
       if (!isFromLifecycle || ModalRoute.of(context)?.isCurrent == true) {
         _resumed = false;
+
         onPause();
         viewModel.onPause();
+        _forEachLifecycle((listener) {
+          listener.onLifecycle(context, listener.onPause);
+        });
       }
     }
+  }
+
+  /// onDestroy生命周期判断
+  void _onDestroy() {
+    viewModel.onDestroy();
+    onDestroy();
+    _forEachLifecycle((listener) {
+      listener.onLifecycle(context, listener.onDestroy);
+    });
   }
 
   @protected
@@ -172,14 +209,24 @@ abstract class BasePageState<VM extends BaseVM, W extends BasePage<VM>>
         });
   }
 
+  /// 隐藏loading弹框
   void dismissLoading() {
     _currLoading?.pop();
     _currLoading = null;
   }
 
+  /// 如果不喜欢这个加载弹框样式，可以重写
   Dialog createLoadingDialog(String? loadingTxt) {
     return DefaultLoadingDialog(loadingTxt);
   }
 
+  /// 便利执行生命周期监听回调
+  void _forEachLifecycle(Function(PageLifecycleListener listener) function) {
+    for (var listener in widget.lifecycle.pageLifecycleListener) {
+      function(listener);
+    }
+  }
+
+  /// 创建内容控件，交由子类自行实现
   Widget createContentWidget(BuildContext context, VM viewModel);
 }

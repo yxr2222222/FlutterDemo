@@ -18,6 +18,12 @@ class SimpleSplashPage extends BasePage<_SimpleSplashVM> {
   final String? title;
   final Widget? child;
 
+  /// 简易的开屏页
+  /// [privacyContent] 隐私政策相关内容
+  /// [onPrivacyAgree] 隐私政策同意后的方法回调，用户可在次方法回调中做自己事情
+  /// [icon] 欢迎页面的icon，可以不传，不传则不会有此控件
+  /// [title] 欢迎页面的title，可以不传，不传则不会有此控件
+  /// [child] 欢迎页面的自定义控件，在只有icon和title无法满足的情况下可传入自定义的子控件
   SimpleSplashPage(
       {super.key,
       required this.privacyContent,
@@ -30,6 +36,7 @@ class SimpleSplashPage extends BasePage<_SimpleSplashVM> {
   @override
   State<StatefulWidget> createState() => _SimpleSplashStat();
 
+  /// 根据传入的隐私政策内容获取隐私政策中需要高亮的关键字列表
   List<String> getKeywordList() {
     List<String> keywordList = [];
     for (var element in privacyContent.keywordUrlList) {
@@ -51,19 +58,20 @@ class _SimpleSplashStat
           context: context,
           builder: (BuildContext ctx) {
             return CupertinoAlertDialog(
-                content: widget.privacyContent.content.clickableRichText(
-                    textColor: const Color(0xff5c5c5c),
-                    keywords: widget.getKeywordList(),
-                    onTap: (keyword) {
-                      var keywordUrl =
-                          widget.privacyContent.getKeywordUrl(keyword);
-                      if (keywordUrl != null) {
-                        ctx.push(SimpleWebPage(
-                          url: keywordUrl.url,
-                          title: keyword,
-                        ));
-                      }
-                    }),
+                content:
+                    widget.privacyContent.content.highLightClickableRichText(
+                        textColor: const Color(0xff5c5c5c),
+                        keywords: widget.getKeywordList(),
+                        onKeywordTap: (keyword) {
+                          var keywordUrl =
+                              widget.privacyContent.getKeywordUrl(keyword);
+                          if (keywordUrl != null) {
+                            ctx.push(SimpleWebPage(
+                              url: keywordUrl.url,
+                              title: keyword,
+                            ));
+                          }
+                        }),
                 actions: [
                   CupertinoDialogAction(
                       child: const Text(

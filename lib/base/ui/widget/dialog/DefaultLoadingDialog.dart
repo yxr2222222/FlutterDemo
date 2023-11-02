@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class DefaultLoadingDialog extends Dialog {
+  /// 默认的简易loading弹框
+  /// [loadingTxt] loading展示的内容
   DefaultLoadingDialog(String? loadingTxt, {super.key})
       : super(
             insetPadding: EdgeInsets.zero,

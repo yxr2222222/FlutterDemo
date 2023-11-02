@@ -1,7 +1,11 @@
 class HttpCacheObj {
+  /// 缓存的key
   final String cacheKey;
+  /// 缓存的内容
   final String cacheValue;
+  /// 缓存过期时间
   final int expireTime;
+  /// 缓存更新时间
   int updateTime;
 
   HttpCacheObj(this.cacheKey, this.cacheValue, this.expireTime)

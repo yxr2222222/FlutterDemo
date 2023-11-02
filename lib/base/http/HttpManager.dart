@@ -13,7 +13,7 @@ import '../model/BaseResp.dart';
 import '../util/StorageUtil.dart';
 import 'cache/CacheConfig.dart';
 import 'cache/CacheManager.dart';
-import 'exception/CstHttpException.dart';
+import 'exception/CstException.dart';
 import 'model/BaseRespConfig.dart';
 import 'model/ReqType.dart';
 // UnuseJs这个完成是为了过非Web端的编译
@@ -95,7 +95,7 @@ class HttpManager {
 
     if (cacheConfig != null) {
       // 如果有缓存配置
-      CacheManager.getInstance().init();
+      await CacheManager.getInstance().init();
       _dio.interceptors.add(HttpCacheInterceptor(cacheConfig));
     }
 
@@ -201,10 +201,10 @@ class HttpManager {
       Response response = await future;
       return _parseResponse(response, respConfig, onFromJson);
     } on Exception catch (e) {
-      return BaseResp(false, error: CstHttpException.createHttpException(e));
+      return BaseResp(false, error: CstException.buildException(e));
     } on Error catch (e) {
       return BaseResp(false,
-          error: CstHttpException.createHttpException(Exception(e)));
+          error: CstException.buildException(Exception(e)));
     }
   }
 
@@ -215,7 +215,7 @@ class HttpManager {
       OnFailed? onFailed}) {
     future.then((resp) => {_checkSuccessFailed(resp, onSuccess, onFailed)},
         onError: (e) {
-      _onFailed(onFailed, CstHttpException.createHttpException(e));
+      _onFailed(onFailed, CstException.buildException(e));
     }).catchError((e) {
       return e;
     });
@@ -250,7 +250,7 @@ class HttpManager {
 
       webOnFailed(e) {
         if (onFailed != null) {
-          onFailed(CstHttpException(-1, e.toString()));
+          onFailed(CstException(-1, e.toString()));
         }
       }
 
@@ -272,7 +272,7 @@ class HttpManager {
           }
 
           if (cancelToken?.isCancelled == true && onFailed != null) {
-            onFailed(CstHttpException(-1, "下载已取消"));
+            onFailed(CstException(-1, "下载已取消"));
           }
 
           if (cancelToken?.isCancelled == false &&
@@ -290,7 +290,7 @@ class HttpManager {
           } else {
             detailMessage = e.toString();
           }
-          onFailed(CstHttpException(-1, "下载失败", detailMessage: detailMessage));
+          onFailed(CstException(-1, "下载失败", detailMessage: detailMessage));
         }
       }
     }
@@ -325,7 +325,7 @@ class HttpManager {
     try {
       // 获取response bytes 数据
       if (response.data == null) {
-        return BaseResp(false, error: CstHttpException(-1, "内容为空"));
+        return BaseResp(false, error: CstException(-1, "内容为空"));
       }
 
       // 获取response bytes 数据
@@ -346,12 +346,12 @@ class HttpManager {
       }
     } catch (e) {
       return BaseResp(false,
-          error: CstHttpException(-1, "Resp解析失败", detailMessage: e.toString()));
+          error: CstException(-1, "Resp解析失败", detailMessage: e.toString()));
     }
 
     if (code != successCode) {
       return BaseResp(false,
-          error: CstHttpException(code, msg ?? "业务错误码不等于业务成功码"));
+          error: CstException(code, msg ?? "业务错误码不等于业务成功码"));
     }
 
     return BaseResp(true, data: data);
@@ -363,7 +363,7 @@ class HttpManager {
     }
   }
 
-  void _onFailed(OnFailed? onFailed, CstHttpException exception) {
+  void _onFailed(OnFailed? onFailed, CstException exception) {
     Log.d("Http request failed", error: exception);
     if (onFailed != null) {
       onFailed(exception);
@@ -376,11 +376,11 @@ class HttpManager {
     if (resp.isSuccess) {
       _onSuccess(onSuccess, resp.data);
     } else {
-      _onFailed(onFailed, resp.error ?? CstHttpException(-1, "未知异常"));
+      _onFailed(onFailed, resp.error ?? CstException(-1, "未知异常"));
     }
   }
 }
 
 typedef OnFromJson<T> = T Function(Map<String, dynamic> json);
 typedef OnSuccess<T> = void Function(T? data);
-typedef OnFailed = void Function(CstHttpException exception);
+typedef OnFailed = void Function(CstException exception);

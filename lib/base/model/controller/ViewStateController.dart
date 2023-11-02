@@ -1,4 +1,4 @@
-import 'package:flutter_demo/base/model/BaseGetxController.dart';
+import 'package:flutter_demo/base/model/controller/BaseGetxController.dart';
 import 'package:flutter_demo/base/model/em/ViewState.dart';
 
 class ViewStateController extends BaseGetxController {

@@ -32,6 +32,8 @@ extension ObjectExtension on Object {
     return !kIsWeb && Platform.isFuchsia;
   }
 
+  /// 获取下载路径
+  /// [filename] 文件的名字，需要带上后缀(例如: eg.png)
   Future<File> getDownloadPath({required String filename}) async {
     try {
       Future<Directory> future;
@@ -54,6 +56,9 @@ extension ObjectExtension on Object {
     }
   }
 
+  /// 获取缓存路径
+  /// [filename] 文件的名字，需要带上后缀(例如: eg.png)
+  /// [directory] 二级子目录，不要带/
   Future<File> getCachePath(
       {required String filename, String? directory}) async {
     try {
@@ -68,22 +73,6 @@ extension ObjectExtension on Object {
     return directory?.isNotEmpty == true
         ? File('${dir.path}/$directory/$filename')
         : File('${dir.path}/$filename');
-  }
-
-  void globalCatch(Function function, {OnException? onException}) {
-    try {
-      function();
-    } on Exception catch (e) {
-      _onException(onException, e);
-    } on Error catch (e) {
-      _onException(onException, Exception(e));
-    }
-  }
-
-  void _onException(OnException? onException, Exception e) {
-    if (onException != null) {
-      onException(e);
-    }
   }
 }
 

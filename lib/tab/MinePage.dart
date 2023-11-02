@@ -20,4 +20,9 @@ class _MinePageState extends BasePageState<_MineVM, MinePage> {
   bool get wantKeepAlive => true;
 }
 
-class _MineVM extends BaseVM {}
+class _MineVM extends BaseVM {
+  @override
+  Future<bool> onBackPressed() async {
+    return false;
+  }
+}

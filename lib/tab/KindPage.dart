@@ -20,4 +20,9 @@ class _KindPageState extends BasePageState<_KindVM, KindPage> {
   bool get wantKeepAlive => true;
 }
 
-class _KindVM extends BaseVM {}
+class _KindVM extends BaseVM {
+  @override
+  Future<bool> onBackPressed() async {
+    return false;
+  }
+}

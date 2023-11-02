@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_demo/base/model/BaseGetxController.dart';
+import 'package:flutter_demo/base/model/controller/BaseGetxController.dart';
 
 class AppbarController extends BaseGetxController {
   // appbar 返回图标

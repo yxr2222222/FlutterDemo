@@ -2,12 +2,16 @@ import 'package:get_storage/get_storage.dart';
 
 class StorageUtil {
   static GetStorage? _storage;
+  static bool _inited = false;
 
   StorageUtil._internal();
 
   static Future<bool> init() async {
-    await GetStorage.init();
-    _storage = GetStorage();
+    if (!_inited) {
+      _inited = true;
+      await GetStorage.init();
+      _storage = GetStorage();
+    }
     return true;
   }
 
@@ -19,7 +23,7 @@ class StorageUtil {
     return false;
   }
 
-  static Future<T?> get<T>(String key) async{
+  static Future<T?> get<T>(String key) async {
     if (_storage != null) {
       return _storage!.read(key);
     }

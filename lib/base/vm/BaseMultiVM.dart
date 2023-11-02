@@ -1,10 +1,10 @@
-import 'package:flutter_demo/base/model/ViewStateController.dart';
+import 'package:flutter_demo/base/model/controller/ViewStateController.dart';
 import 'package:flutter_demo/base/model/em/ViewState.dart';
 import 'package:flutter_demo/base/vm/BaseVM.dart';
 
 import '../http/HttpManager.dart';
-import '../http/exception/CstHttpException.dart';
-import '../model/AppbarController.dart';
+import '../http/exception/CstException.dart';
+import '../model/controller/AppbarController.dart';
 import '../model/BaseResp.dart';
 
 abstract class BaseMultiVM extends BaseVM {
@@ -66,7 +66,7 @@ abstract class BaseMultiVM extends BaseVM {
             }
           }
         },
-        onFailed: (CstHttpException e) {
+        onFailed: (CstException e) {
           if (!isFinishing()) {
             // 接口失败，展示错误状态UI
             showErrorState(

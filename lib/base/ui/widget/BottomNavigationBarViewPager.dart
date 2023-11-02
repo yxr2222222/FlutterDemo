@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_demo/base/model/SimpleGetxController.dart';
+import 'package:flutter_demo/base/model/controller/SimpleGetxController.dart';
 import 'package:flutter_demo/base/util/GetBuilderUtil.dart';
 
 class BottomNavigationBarViewPager extends StatelessWidget {
@@ -10,14 +10,24 @@ class BottomNavigationBarViewPager extends StatelessWidget {
   final double checkedTxtSize;
   final bool normalTxtShow;
   final bool checkedTxtShow;
-  final IconThemeData normalIconTheme;
-  final IconThemeData checkedIconTheme;
   final int initIndex;
   final PageController pageController;
   final BottomNavigationBarType type;
   final bool canUserScroll;
   final SimpleGetxController<int> _currIndex = SimpleGetxController(0);
 
+  /// 类似Android的ViewPager+底部Tab的组件
+  /// [viewPagerDataList] 子page列表数据
+  /// [normalTxtColor] 底部未选中控件的文字颜色
+  /// [checkedTxtColor] 底部选中控件的文字颜色
+  /// [normalTxtSize] 底部未选中控件的文字大小
+  /// [checkedTxtSize] 底部选中控件的文字大小
+  /// [normalTxtShow] 底部未选中控件的文字是否展示
+  /// [checkedTxtShow] 底部选中控件的文字是否展示
+  /// [initIndex] 默认展示第几个页面
+  /// [pageController] 页面控制器
+  /// [type] 底部控件排放类型[BottomNavigationBarType.fixed]
+  /// [canUserScroll] 可以不可以滑动viewPager切换页面
   BottomNavigationBarViewPager(
       {super.key,
       required this.viewPagerDataList,
@@ -27,16 +37,12 @@ class BottomNavigationBarViewPager extends StatelessWidget {
       this.checkedTxtSize = 14.0,
       this.normalTxtShow = true,
       this.checkedTxtShow = true,
-      IconThemeData? normalIconTheme,
-      IconThemeData? checkedIconTheme,
       this.initIndex = 0,
       PageController? pageController,
       BottomNavigationBarType? type,
       bool? canUserScroll})
       : normalTxtColor = normalTxtColor ?? const Color(0xff999999),
         checkedTxtColor = checkedTxtColor ?? const Color(0xff333333),
-        normalIconTheme = normalIconTheme ?? const IconThemeData(size: 24),
-        checkedIconTheme = checkedIconTheme ?? const IconThemeData(size: 24),
         pageController =
             pageController ?? PageController(initialPage: initIndex),
         type = type ?? BottomNavigationBarType.fixed,
@@ -92,10 +98,6 @@ class BottomNavigationBarViewPager extends StatelessWidget {
                     showSelectedLabels: checkedTxtShow,
                     // 显示不选中时的问题
                     showUnselectedLabels: normalTxtShow,
-                    // 未选中图标主题
-                    unselectedIconTheme: normalIconTheme,
-                    // 选中图标主题
-                    selectedIconTheme: checkedIconTheme,
                     // 当前下标
                     currentIndex: _currIndex.dataNotNull,
                     type: type,

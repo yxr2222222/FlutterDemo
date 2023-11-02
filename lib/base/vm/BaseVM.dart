@@ -3,12 +3,13 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/base/extension/BuildContextExtension.dart';
+import 'package:flutter_demo/base/ui/page/BasePage.dart';
 import 'package:flutter_demo/base/util/Log.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import '../http/HttpManager.dart';
 import '../http/api/BaseApi.dart';
-import '../http/exception/CstHttpException.dart';
+import '../http/exception/CstException.dart';
 import '../model/BaseResp.dart';
 import '../model/PermissionReq.dart';
 import '../util/PermissionUtil.dart';
@@ -31,17 +32,17 @@ abstract class BaseVM {
 
   /// onCreate生命周期
   void onCreate() {
-    // Log.d("$_className: onCreate...");
+    Log.d("$_className: onCreate...");
   }
 
   /// onResume生命周期
   void onResume() {
-    // Log.d("$_className: onResume...");
+    Log.d("$_className: onResume...");
   }
 
   /// onPause生命周期
   void onPause() {
-    // Log.d("$_className: onPause...");
+    Log.d("$_className: onPause...");
   }
 
   /// onDestroy生命周期
@@ -50,10 +51,12 @@ abstract class BaseVM {
     onShowLoading = null;
     onDismissLoading = null;
     _cancelRequests();
-    // Log.d("$_className: onDestroy...");
+    Log.d("$_className: onDestroy...");
   }
 
   /// 返回按钮点击
+  /// 注意，如果是带有[BasePage]嵌套[BasePage]的情况，子[BasePage]需要override并不执行pop操作
+  /// 以上提到的[BasePage]是指[BasePage]和[BasePage]的子类
   Future<bool> onBackPressed() async {
     if (_context != null) {
       _context?.pop();
@@ -105,7 +108,7 @@ abstract class BaseVM {
             }
           }
         },
-        onFailed: (CstHttpException e) {
+        onFailed: (CstException e) {
           // 接口请求失败
           if (!isFinishing()) {
             if (isNeedLoading) {
@@ -230,6 +233,7 @@ abstract class BaseVM {
     return _context == null || !_context!.isUseful();
   }
 
+  /// 创建api，这个方法主要是将api绑定到VM中，VM销毁时会去cancel其中的未完成请求
   API createApi<API extends BaseApi>(API api) {
     if (!_apiList.contains(api)) {
       _apiList.add(api);

@@ -20,4 +20,9 @@ class _HomePageState extends BasePageState<_HomeVM, HomePage> {
   bool get wantKeepAlive => true;
 }
 
-class _HomeVM extends BaseVM {}
+class _HomeVM extends BaseVM {
+  @override
+  Future<bool> onBackPressed() async {
+    return false;
+  }
+}

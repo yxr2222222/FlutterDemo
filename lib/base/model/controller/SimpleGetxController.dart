@@ -1,4 +1,4 @@
-import 'package:flutter_demo/base/model/BaseGetxController.dart';
+import 'package:flutter_demo/base/model/controller/BaseGetxController.dart';
 
 class SimpleGetxController<T> extends BaseGetxController {
   T? _data;
