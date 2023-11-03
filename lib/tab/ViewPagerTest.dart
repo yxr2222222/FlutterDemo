@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_demo/base/vm/BaseMultiVM.dart';
 import 'package:flutter_demo/tab/BasketPage.dart';
 import 'package:flutter_demo/tab/HomePage.dart';
 import 'package:flutter_demo/tab/KindPage.dart';
 import 'package:flutter_demo/tab/MinePage.dart';
-
-import '../base/ui/page/BaseMultiStatePage.dart';
-import '../base/ui/widget/BottomNavigationBarViewPager.dart';
+import 'package:yxr_flutter_basic/base/ui/page/BaseMultiStatePage.dart';
+import 'package:yxr_flutter_basic/base/ui/widget/BottomNavigationBarViewPager.dart';
+import 'package:yxr_flutter_basic/base/vm/BaseMultiVM.dart';
 
 class ViewPagerTest extends BaseMultiPage<_ViewPagerVM> {
   ViewPagerTest({super.key}) : super(viewModel: _ViewPagerVM());

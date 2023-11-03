@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/HttpTestWidget.dart';
 import 'package:flutter_demo/RefreshLoadTestWidget.dart';
-import 'package:flutter_demo/base/extension/BuildContextExtension.dart';
-import 'package:flutter_demo/base/model/PermissionReq.dart';
-import 'package:flutter_demo/base/ui/page/SimpleWebPage.dart';
-import 'package:flutter_demo/base/vm/BaseListVM.dart';
 import 'package:flutter_demo/tab/ViewPagerTest.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'base/ui/page/BaseMultiStatePage.dart';
+import 'package:yxr_flutter_basic/base/extension/BuildContextExtension.dart';
+import 'package:yxr_flutter_basic/base/model/PermissionReq.dart';
+import 'package:yxr_flutter_basic/base/ui/page/BaseMultiStatePage.dart';
+import 'package:yxr_flutter_basic/base/ui/page/SimpleWebPage.dart';
+import 'package:yxr_flutter_basic/base/vm/BaseListVM.dart';
 
 class FunctionListPage extends BaseMultiPage<_FunctionListPageVM> {
   FunctionListPage({super.key}) : super(viewModel: _FunctionListPageVM());

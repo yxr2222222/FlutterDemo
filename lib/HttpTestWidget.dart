@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/api/AppUpdateApi.dart';
-import 'package:flutter_demo/base/model/controller/SimpleGetxController.dart';
-import 'package:flutter_demo/base/ui/widget/SimpleWidget.dart';
-import 'package:flutter_demo/base/util/GetBuilderUtil.dart';
-import 'package:flutter_demo/base/util/Log.dart';
-
-import 'base/ui/page/BaseMultiStatePage.dart';
-import 'base/vm/BaseMultiVM.dart';
+import 'package:yxr_flutter_basic/base/model/controller/SimpleGetxController.dart';
+import 'package:yxr_flutter_basic/base/ui/page/BaseMultiStatePage.dart';
+import 'package:yxr_flutter_basic/base/ui/widget/SimpleWidget.dart';
+import 'package:yxr_flutter_basic/base/util/GetBuilderUtil.dart';
+import 'package:yxr_flutter_basic/base/util/Log.dart';
+import 'package:yxr_flutter_basic/base/vm/BaseMultiVM.dart';
 import 'model/app_update.dart';
 
 class HttpTestWidget extends BaseMultiPage<_HttpTestVM> {

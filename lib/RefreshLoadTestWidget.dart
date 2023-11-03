@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_demo/base/model/BaseResp.dart';
-import 'package:flutter_demo/base/model/PageResult.dart';
-import 'package:flutter_demo/base/vm/BasePageListVM.dart';
+import 'package:yxr_flutter_basic/base/model/BaseResp.dart';
+import 'package:yxr_flutter_basic/base/model/PageResult.dart';
+import 'package:yxr_flutter_basic/base/ui/page/BaseMultiStatePage.dart';
+import 'package:yxr_flutter_basic/base/vm/BasePageListVM.dart';
 
 import 'api/TestPageDataApi.dart';
-import 'base/ui/page/BaseMultiStatePage.dart';
 
 class RefreshLoadTestWidget extends BaseMultiPage<_RefreshLoadTestVM> {
   RefreshLoadTestWidget({super.key}) : super(viewModel: _RefreshLoadTestVM());

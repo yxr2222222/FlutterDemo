@@ -1,7 +1,5 @@
-import 'package:flutter_demo/model/app_update.dart';
-
-import '../base/http/api/BaseApi.dart';
-import '../base/model/BaseResp.dart';
+import 'package:yxr_flutter_basic/base/http/api/BaseApi.dart';
+import 'package:yxr_flutter_basic/base/model/BaseResp.dart';
 
 class TestPageDataApi extends BaseApi {
   Future<BaseResp<List<dynamic>>> getTestPageData({required int page}) {

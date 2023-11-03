@@ -1,8 +1,7 @@
-import 'package:flutter_demo/base/http/cache/CacheMode.dart';
 import 'package:flutter_demo/model/app_update.dart';
-
-import '../base/http/api/BaseApi.dart';
-import '../base/model/BaseResp.dart';
+import 'package:yxr_flutter_basic/base/http/api/BaseApi.dart';
+import 'package:yxr_flutter_basic/base/http/cache/CacheMode.dart';
+import 'package:yxr_flutter_basic/base/model/BaseResp.dart';
 
 class AppUpdateApi extends BaseApi {
   Future<BaseResp<AppUpdate>> getAppUpdate() {

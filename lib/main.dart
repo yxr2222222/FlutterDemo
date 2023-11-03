@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_demo/base/extension/BuildContextExtension.dart';
-import 'package:flutter_demo/base/http/cache/CacheConfig.dart';
-import 'package:flutter_demo/base/ui/page/SimpleSplashPage.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:yxr_flutter_basic/base/extension/BuildContextExtension.dart';
+import 'package:yxr_flutter_basic/base/http/HttpManager.dart';
+import 'package:yxr_flutter_basic/base/http/cache/CacheConfig.dart';
+import 'package:yxr_flutter_basic/base/http/model/BaseRespConfig.dart';
+import 'package:yxr_flutter_basic/base/ui/page/SimpleSplashPage.dart';
 import 'FunctionListPage.dart';
-import 'base/http/HttpManager.dart';
-import 'base/http/model/BaseRespConfig.dart';
 
 void main() async {
   /// 初始化网络请求配置

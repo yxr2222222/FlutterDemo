@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_demo/base/vm/BaseVM.dart';
-
-import '../base/ui/page/BasePage.dart';
+import 'package:yxr_flutter_basic/base/ui/page/BasePage.dart';
+import 'package:yxr_flutter_basic/base/vm/BaseVM.dart';
 
 class MinePage extends BasePage<_MineVM> {
   MinePage({super.key}) : super(viewModel: _MineVM());
