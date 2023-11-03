@@ -10,7 +10,7 @@ import 'FunctionListPage.dart';
 void main() async {
   /// 初始化网络请求配置
   await HttpManager.getInstance().init(
-      baseUrl: "http://192.168.1.116:8089/",
+      baseUrl: "http://192.168.1.117:8089/",
       cacheConfig: CacheConfig(),
       debug: true,
       respConfig: BaseRespConfig(filedCode: "code", filedMsg: "message"));

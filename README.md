@@ -1,6 +1,4 @@
 # flutter_demo
+一个Flutter基础框架Demo，[基础框架](https://github.com/yxr2222222/yxr_flutter_basic)为此项目
 
-A new Flutter project.
 
-## 注意！！
-如果需要Web端需要将web下的index.html文件里的<script></script>代码拷贝到自己项目的文件下
