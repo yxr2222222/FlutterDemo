@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_demo/tab/BasketPage.dart';
-import 'package:flutter_demo/tab/HomePage.dart';
-import 'package:flutter_demo/tab/KindPage.dart';
-import 'package:flutter_demo/tab/MinePage.dart';
 import 'package:yxr_flutter_basic/base/ui/page/BaseMultiStatePage.dart';
 import 'package:yxr_flutter_basic/base/ui/widget/BottomNavigationBarViewPager.dart';
 import 'package:yxr_flutter_basic/base/vm/BaseMultiVM.dart';
+
+import 'TabBasketPage.dart';
+import 'TabHomePage.dart';
+import 'TabKindPage.dart';
+import 'TabMinePage.dart';
 
 class ViewPagerTest extends BaseMultiPage<_ViewPagerVM> {
   ViewPagerTest({super.key}) : super(viewModel: _ViewPagerVM());
@@ -20,22 +21,22 @@ class _ViewPagerTestState
   Widget createMultiContentWidget(BuildContext context, _ViewPagerVM viewModel) {
     List<ViewPagerData> viewPagerDataList = [
       ViewPagerData(
-          pageWidget: HomePage(),
+          pageWidget: TabHomePage(),
           label: "首页",
           icon: "images/homepage.png",
           activeIcon: "images/homepage-sel.png"),
       ViewPagerData(
-          pageWidget: KindPage(),
+          pageWidget: TabKindPage(),
           label: "分类",
           icon: "images/category.png",
           activeIcon: "images/category-sel.png"),
       ViewPagerData(
-          pageWidget: BasketPage(),
+          pageWidget: TabBasketPage(),
           label: "购物车",
           icon: "images/basket.png",
           activeIcon: "images/basket-sel.png"),
       ViewPagerData(
-          pageWidget: MinePage(),
+          pageWidget: TabMinePage(),
           label: "我的",
           icon: "images/user.png",
           activeIcon: "images/user-sel.png")

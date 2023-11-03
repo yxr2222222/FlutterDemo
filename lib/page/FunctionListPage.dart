@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_demo/HttpTestWidget.dart';
-import 'package:flutter_demo/RefreshLoadTestWidget.dart';
-import 'package:flutter_demo/tab/ViewPagerTest.dart';
+import 'package:flutter_demo/page/ProductDetailPage.dart';
+import 'package:flutter_demo/page/ProductListPage.dart';
+import 'package:flutter_demo/page/tab/ViewPagerTest.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:yxr_flutter_basic/base/extension/BuildContextExtension.dart';
 import 'package:yxr_flutter_basic/base/model/PermissionReq.dart';
@@ -16,23 +16,22 @@ class FunctionListPage extends BaseMultiPage<_FunctionListPageVM> {
   State<FunctionListPage> createState() => _FunctionListState();
 }
 
-class _FunctionListState extends BaseMultiPageState<_FunctionListPageVM, FunctionListPage> {
+class _FunctionListState
+    extends BaseMultiPageState<_FunctionListPageVM, FunctionListPage> {
   @override
   Widget createMultiContentWidget(
       BuildContext context, _FunctionListPageVM viewModel) {
     return viewModel.listBuilder(
       onItemClick: (item, context) {
-        if (_FunctionListPageVM.API == item.item.title) {
-          context.push(HttpTestWidget());
-        } else if (_FunctionListPageVM.PERMISSION == item.item.title) {
+        if (_FunctionListPageVM.PERMISSION == item.item.title) {
           viewModel.requestPermission(PermissionReq(
               [Permission.camera, Permission.location], onGranted: () {
             showToast("权限申请成功");
           }, onDenied: (isPermanentlyDenied) {
             showToast("权限申请失败,是否被多次拒绝或永久拒绝: $isPermanentlyDenied");
           }));
-        } else if (_FunctionListPageVM.REFRESH == item.item.title) {
-          context.push(RefreshLoadTestWidget());
+        } else if (_FunctionListPageVM.PRODUCT_LIST == item.item.title) {
+          context.push(ProductListPage());
         } else if (_FunctionListPageVM.VIEW_PAGER == item.item.title) {
           context.push(ViewPagerTest());
         } else if (_FunctionListPageVM.WEB_VIEW == item.item.title) {
@@ -59,8 +58,7 @@ class _FunctionListState extends BaseMultiPageState<_FunctionListPageVM, Functio
 }
 
 class _FunctionListPageVM extends BaseListVM<MainTitle> {
-  static const String API = "API请求示例";
-  static const String REFRESH = "下拉刷新/上拉加载";
+  static const String PRODUCT_LIST = "商品列表界面";
   static const String PERMISSION = "权限申请";
   static const String VIEW_PAGER = "ViewPager";
   static const String WEB_VIEW = "WebView";
@@ -73,8 +71,7 @@ class _FunctionListPageVM extends BaseListVM<MainTitle> {
     appbarController.appbarTitle = "FlutterDemo";
 
     refreshData(isClear: true, dataList: [
-      MainTitle(API),
-      MainTitle(REFRESH),
+      MainTitle(PRODUCT_LIST),
       MainTitle(PERMISSION),
       MainTitle(VIEW_PAGER),
       MainTitle(WEB_VIEW),

@@ -5,15 +5,18 @@ import 'package:yxr_flutter_basic/base/http/HttpManager.dart';
 import 'package:yxr_flutter_basic/base/http/cache/CacheConfig.dart';
 import 'package:yxr_flutter_basic/base/http/model/BaseRespConfig.dart';
 import 'package:yxr_flutter_basic/base/ui/page/SimpleSplashPage.dart';
-import 'FunctionListPage.dart';
+import 'page/FunctionListPage.dart';
 
 void main() async {
   /// 初始化网络请求配置
   await HttpManager.getInstance().init(
-      baseUrl: "http://192.168.1.117:8089/",
+      // 接口请求的BaseUrl
+      baseUrl: "https://portal-api.macrozheng.com",
+      // 如果接口请求需要启用缓存，不需要缓存可不配置
       cacheConfig: CacheConfig(),
       debug: true,
-      respConfig: BaseRespConfig(filedCode: "code", filedMsg: "message"));
+      // 返回结果配置，接口返回之后进行内部结果解析
+      respConfig: BaseRespConfig(filedCode: "code", filedMsg: "message", successCode: 200));
   runApp(const MyApp());
 }
 
