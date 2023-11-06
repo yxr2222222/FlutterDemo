@@ -3,7 +3,7 @@ import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:yxr_flutter_basic/base/extension/BuildContextExtension.dart';
 import 'package:yxr_flutter_basic/base/http/HttpManager.dart';
 import 'package:yxr_flutter_basic/base/http/cache/CacheConfig.dart';
-import 'package:yxr_flutter_basic/base/http/model/BaseRespConfig.dart';
+import 'package:yxr_flutter_basic/base/http/model/RespConfig.dart';
 import 'package:yxr_flutter_basic/base/ui/page/SimpleSplashPage.dart';
 import 'page/FunctionListPage.dart';
 
@@ -16,7 +16,7 @@ void main() async {
       cacheConfig: CacheConfig(),
       debug: true,
       // 返回结果配置，接口返回之后进行内部结果解析
-      respConfig: BaseRespConfig(filedCode: "code", filedMsg: "message", successCode: 200));
+      respConfig: RespConfig(filedCode: "code", filedMsg: "message", successCode: 200));
   runApp(const MyApp());
 }
 

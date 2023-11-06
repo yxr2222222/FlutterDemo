@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/api/ProductApi.dart';
 import 'package:flutter_demo/model/product_detail.dart';
@@ -10,7 +11,7 @@ import 'package:yxr_flutter_basic/base/vm/BaseMultiVM.dart';
 
 class ProductDetailPage extends BaseMultiPage<_ProductDetailVM> {
   ProductDetailPage({super.key, required int productId})
-      : super(viewModel: _ProductDetailVM(productId));
+      : super(viewModel: _ProductDetailVM(productId), extendBodyBehindAppBar: true);
 
   @override
   State<StatefulWidget> createState() => _ProductDetailState();
@@ -24,6 +25,16 @@ class _ProductDetailState
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
+        GetBuilderUtil.builder(
+            (controller) => CachedNetworkImage(
+                  width: double.infinity,
+                  height: 256,
+                  fit: BoxFit.cover,
+                  imageUrl: controller.data?.brand?.bigPic ?? "",
+                  placeholder: (context, url) => const Icon(Icons.downloading),
+                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                ),
+            init: viewModel.productDetail),
         SimpleWidget(
             margin: const EdgeInsets.only(top: 16),
             width: 200,
@@ -68,9 +79,8 @@ class _ProductDetailVM extends BaseMultiVM {
   @override
   void onCreate() {
     super.onCreate();
+    appbarController.appbarBackgroundColor = Colors.transparent;
     appUpdateApi = createApi(ProductApi());
-
-    appbarController.appbarTitle = "获取商品详情";
 
     _getProductDetail();
   }
@@ -88,7 +98,6 @@ class _ProductDetailVM extends BaseMultiVM {
         onSuccess: (ProductDetail? data) {
           stateTxt.data = "下载图片";
           productDetail.data = data;
-          appbarController.appbarTitle = data?.product?.name ?? "未知标题";
         });
   }
 

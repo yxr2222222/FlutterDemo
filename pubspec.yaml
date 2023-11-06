@@ -32,7 +32,10 @@ dependencies:
     sdk: flutter
 
   # 集成yxr_flutter_basic依赖
-  yxr_flutter_basic: ^0.0.5
+  yxr_flutter_basic: ^0.0.9
+#  yxr_flutter_basic:
+#    path: ../yxr_flutter_basic
+
   # 集成yxr_flutter_basic内部使用到的依赖
   cupertino_icons: ^1.0.2
   fluttertoast: ^8.2.2
