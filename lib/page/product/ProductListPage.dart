@@ -1,14 +1,14 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/model/product_detail.dart';
-import 'package:flutter_demo/page/ProductDetailPage.dart';
+import 'package:flutter_demo/page/product/ProductDetailPage.dart';
 import 'package:yxr_flutter_basic/base/extension/BuildContextExtension.dart';
 import 'package:yxr_flutter_basic/base/model/BaseResp.dart';
 import 'package:yxr_flutter_basic/base/model/PageResult.dart';
+import 'package:yxr_flutter_basic/base/ui/CacheImage.dart';
 import 'package:yxr_flutter_basic/base/ui/page/BaseMultiStatePage.dart';
 import 'package:yxr_flutter_basic/base/vm/BasePageListVM.dart';
 
-import '../api/ProductApi.dart';
+import '../../api/ProductApi.dart';
 
 class ProductListPage extends BaseMultiPage<_ProductListVM> {
   ProductListPage({super.key}) : super(viewModel: _ProductListVM());
@@ -37,13 +37,10 @@ class _ProductListState
           margin: const EdgeInsets.only(top: 0.5),
           child: Row(
             children: [
-              CachedNetworkImage(
+              CacheImage.simple(
                 width: 64,
                 height: 64,
-                fit: BoxFit.cover,
                 imageUrl: item.item.product.pic ?? "",
-                placeholder: (context, url) => const Icon(Icons.downloading),
-                errorWidget: (context, url, error) => const Icon(Icons.error),
               ),
               Expanded(
                   child: Container(

@@ -1,8 +1,8 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/api/ProductApi.dart';
 import 'package:flutter_demo/model/product_detail.dart';
 import 'package:yxr_flutter_basic/base/model/controller/SimpleGetxController.dart';
+import 'package:yxr_flutter_basic/base/ui/CacheImage.dart';
 import 'package:yxr_flutter_basic/base/ui/page/BaseMultiStatePage.dart';
 import 'package:yxr_flutter_basic/base/ui/widget/SimpleWidget.dart';
 import 'package:yxr_flutter_basic/base/util/GetBuilderUtil.dart';
@@ -11,7 +11,9 @@ import 'package:yxr_flutter_basic/base/vm/BaseMultiVM.dart';
 
 class ProductDetailPage extends BaseMultiPage<_ProductDetailVM> {
   ProductDetailPage({super.key, required int productId})
-      : super(viewModel: _ProductDetailVM(productId), extendBodyBehindAppBar: true);
+      : super(
+            viewModel: _ProductDetailVM(productId),
+            extendBodyBehindAppBar: true);
 
   @override
   State<StatefulWidget> createState() => _ProductDetailState();
@@ -26,13 +28,9 @@ class _ProductDetailState
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         GetBuilderUtil.builder(
-            (controller) => CachedNetworkImage(
-                  width: double.infinity,
+            (controller) => CacheImage.simple(
                   height: 256,
-                  fit: BoxFit.cover,
                   imageUrl: controller.data?.brand?.bigPic ?? "",
-                  placeholder: (context, url) => const Icon(Icons.downloading),
-                  errorWidget: (context, url, error) => const Icon(Icons.error),
                 ),
             init: viewModel.productDetail),
         SimpleWidget(

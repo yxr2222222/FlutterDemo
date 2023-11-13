@@ -8,17 +8,17 @@ import 'TabHomePage.dart';
 import 'TabKindPage.dart';
 import 'TabMinePage.dart';
 
-class ViewPagerTest extends BaseMultiPage<_ViewPagerVM> {
-  ViewPagerTest({super.key}) : super(viewModel: _ViewPagerVM());
+class BottomNavigationBarViewPagerPage extends BaseMultiPage<_BottomNavigationBarViewPagerVM> {
+  BottomNavigationBarViewPagerPage({super.key}) : super(viewModel: _BottomNavigationBarViewPagerVM());
 
   @override
-  State<StatefulWidget> createState() => _ViewPagerTestState();
+  State<StatefulWidget> createState() => _BottomNavigationBarViewPagerState();
 }
 
-class _ViewPagerTestState
-    extends BaseMultiPageState<_ViewPagerVM, ViewPagerTest> {
+class _BottomNavigationBarViewPagerState
+    extends BaseMultiPageState<_BottomNavigationBarViewPagerVM, BottomNavigationBarViewPagerPage> {
   @override
-  Widget createMultiContentWidget(BuildContext context, _ViewPagerVM viewModel) {
+  Widget createMultiContentWidget(BuildContext context, _BottomNavigationBarViewPagerVM viewModel) {
     List<ViewPagerData> viewPagerDataList = [
       ViewPagerData(
           pageWidget: TabHomePage(),
@@ -46,10 +46,10 @@ class _ViewPagerTestState
   }
 }
 
-class _ViewPagerVM extends BaseMultiVM {
+class _BottomNavigationBarViewPagerVM extends BaseMultiVM {
   @override
   void onCreate() {
     super.onCreate();
-    appbarController.appbarTitle = "ViewPager示例";
+    appbarController.appbarTitle = "BottomNavigationBarViewPager示例";
   }
 }
