@@ -9,18 +9,21 @@ import 'package:yxr_flutter_basic/base/util/GetBuilderUtil.dart';
 import 'package:yxr_flutter_basic/base/util/Log.dart';
 import 'package:yxr_flutter_basic/base/vm/BaseMultiVM.dart';
 
-class ProductDetailPage extends BaseMultiPage<_ProductDetailVM> {
-  ProductDetailPage({super.key, required int productId})
-      : super(
-            viewModel: _ProductDetailVM(productId),
-            extendBodyBehindAppBar: true);
+class ProductDetailPage extends BaseMultiPage {
+  final int productId;
+
+  ProductDetailPage({super.key, required this.productId})
+      : super(extendBodyBehindAppBar: true);
 
   @override
-  State<StatefulWidget> createState() => _ProductDetailState();
+  State<BaseMultiPage> createState() => _ProductDetailState();
 }
 
 class _ProductDetailState
     extends BaseMultiPageState<_ProductDetailVM, ProductDetailPage> {
+  @override
+  _ProductDetailVM createViewModel() => _ProductDetailVM(widget.productId);
+
   @override
   Widget createMultiContentWidget(
       BuildContext context, _ProductDetailVM viewModel) {

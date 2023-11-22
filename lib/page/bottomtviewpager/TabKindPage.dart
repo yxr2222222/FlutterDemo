@@ -2,14 +2,19 @@ import 'package:flutter/cupertino.dart';
 import 'package:yxr_flutter_basic/base/ui/page/BasePage.dart';
 import 'package:yxr_flutter_basic/base/vm/BaseVM.dart';
 
-class TabKindPage extends BasePage<_KindVM> {
-  TabKindPage({super.key}) : super(viewModel: _KindVM());
+class TabKindPage extends BasePage {
+  TabKindPage({super.key});
 
   @override
-  State<StatefulWidget> createState() => _KindPageState();
+  State<BasePage> createState() => _KindPageState();
+
 }
 
 class _KindPageState extends BasePageState<_KindVM, TabKindPage> {
+
+  @override
+  _KindVM createViewModel() => _KindVM();
+
   @override
   Widget createContentWidget(BuildContext context, _KindVM viewModel) {
     return const Center(child: Text("KindPage"));

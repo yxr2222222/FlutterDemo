@@ -6,15 +6,18 @@ import 'package:yxr_flutter_basic/base/ui/widget/TabbarViewPager.dart';
 import 'package:yxr_flutter_basic/base/util/GetBuilderUtil.dart';
 import 'package:yxr_flutter_basic/base/vm/BaseMultiVM.dart';
 
-class TabViewPagerPage extends BaseMultiPage<_TabViewPagerVM> {
-  TabViewPagerPage({super.key}) : super(viewModel: _TabViewPagerVM());
+class TabViewPagerPage extends BaseMultiPage {
+  TabViewPagerPage({super.key});
 
   @override
-  State<StatefulWidget> createState() => _TabViewPagerState();
+  State<BaseMultiPage> createState() => _TabViewPagerState();
 }
 
 class _TabViewPagerState
     extends BaseMultiPageState<_TabViewPagerVM, TabViewPagerPage> {
+  @override
+  _TabViewPagerVM createViewModel() => _TabViewPagerVM();
+
   @override
   Widget createMultiContentWidget(
       BuildContext context, _TabViewPagerVM viewModel) {
@@ -54,6 +57,7 @@ class _TabViewPagerVM extends BaseMultiVM {
       for (int i = 0; i < 10; i++) {
         dataList.add(TabbarViewPagerData(
             _buildTab("Title $i"),
+
             /// ViewPager的内容控件通过GetBuilder绑定，页面改变时用来更新wantKeepAlive
             GetBuilderUtil.builder(
                 (controller) => TabViewPagerChildPage(

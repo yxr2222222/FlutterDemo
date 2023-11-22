@@ -10,26 +10,24 @@ import 'package:yxr_flutter_basic/base/vm/BasePageListVM.dart';
 
 import '../../api/ProductApi.dart';
 
-class ProductListPage extends BaseMultiPage<_ProductListVM> {
-  ProductListPage({super.key}) : super(viewModel: _ProductListVM());
+class ProductListPage extends BaseMultiPage {
+  ProductListPage({super.key});
 
   @override
-  State<StatefulWidget> createState() => _ProductListState();
+  State<BaseMultiPage> createState() => _ProductListState();
 }
 
 class _ProductListState
     extends BaseMultiPageState<_ProductListVM, ProductListPage> {
   @override
+  _ProductListVM createViewModel() => _ProductListVM();
+
+  @override
   Widget createMultiContentWidget(
       BuildContext context, _ProductListVM viewModel) {
-    return viewModel.listRefreshBuilder(onItemClick: (item, context) {
-      item.item.clickNum = item.item.clickNum + 1;
-      item.refresh();
-      context.push(ProductDetailPage(
-        productId: item.item.product.id ?? 26,
-      ));
-    }, childItemBuilder: (item, context) {
-      return Container(
+    return viewModel.easyRefreshBuilder(
+        child: viewModel.listBuilder(
+      childItemBuilder: (item, context) => Container(
           width: double.infinity,
           alignment: Alignment.center,
           padding: const EdgeInsets.all(16),
@@ -66,8 +64,15 @@ class _ProductListState
                 ),
               ))
             ],
-          ));
-    });
+          )),
+      onItemClick: (item, context) {
+        item.item.clickNum = item.item.clickNum + 1;
+        item.refresh();
+        context.push(ProductDetailPage(
+          productId: item.item.product.id ?? 26,
+        ));
+      },
+    ));
   }
 }
 

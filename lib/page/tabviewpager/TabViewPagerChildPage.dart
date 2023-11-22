@@ -4,7 +4,7 @@ import 'package:yxr_flutter_basic/base/ui/page/BasePage.dart';
 import 'package:yxr_flutter_basic/base/util/Log.dart';
 import 'package:yxr_flutter_basic/base/vm/BaseVM.dart';
 
-class TabViewPagerChildPage extends BasePage<_TabViewPagerChildVM> {
+class TabViewPagerChildPage extends BasePage {
   final String title;
   final int pageIndex;
   final int currPage;
@@ -13,15 +13,18 @@ class TabViewPagerChildPage extends BasePage<_TabViewPagerChildVM> {
       {super.key,
       required this.title,
       required this.pageIndex,
-      required this.currPage})
-      : super(viewModel: _TabViewPagerChildVM());
+      required this.currPage});
 
   @override
-  State<StatefulWidget> createState() => _TabViewPagerChildState();
+  State<BasePage> createState() => _TabViewPagerChildState();
 }
 
 class _TabViewPagerChildState
     extends BasePageState<_TabViewPagerChildVM, TabViewPagerChildPage> {
+
+  @override
+  _TabViewPagerChildVM createViewModel() => _TabViewPagerChildVM();
+
   /// viewpager需要左右各keep alive几个
   static const int off_limit = 1;
 

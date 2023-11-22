@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_demo/page/grid/GridPage.dart';
+import 'package:flutter_demo/page/grid/StaggeredGridPage.dart';
+import 'package:flutter_demo/page/grid/WaterfallGridPage.dart';
 import 'package:flutter_demo/page/product/ProductListPage.dart';
 import 'package:flutter_demo/page/tabviewpager/TabViewPagerPage.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -10,19 +13,34 @@ import 'package:yxr_flutter_basic/base/vm/BaseListVM.dart';
 
 import 'bottomtviewpager/BottomNavigationBarViewPagerPage.dart';
 
-class FunctionListPage extends BaseMultiPage<_FunctionListPageVM> {
-  FunctionListPage({super.key}) : super(viewModel: _FunctionListPageVM());
+class FunctionListPage extends BaseMultiPage {
+  FunctionListPage({super.key});
 
   @override
-  State<FunctionListPage> createState() => _FunctionListState();
+  State<BaseMultiPage> createState() => _FunctionListState();
 }
 
 class _FunctionListState
     extends BaseMultiPageState<_FunctionListPageVM, FunctionListPage> {
   @override
+  _FunctionListPageVM createViewModel() => _FunctionListPageVM();
+
+  @override
   Widget createMultiContentWidget(
       BuildContext context, _FunctionListPageVM viewModel) {
     return viewModel.listBuilder(
+      childItemBuilder: (itemWidget, context) {
+        return Container(
+            width: double.infinity,
+            height: 48,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(color: itemWidget.item.background),
+            margin: const EdgeInsets.only(top: 0.5),
+            child: Text(
+              itemWidget.item.title,
+              style: const TextStyle(fontSize: 16, color: Color(0xff333333)),
+            ));
+      },
       onItemClick: (item, context) {
         if (_FunctionListPageVM.PERMISSION == item.item.title) {
           viewModel.requestPermission(PermissionReq(
@@ -37,24 +55,18 @@ class _FunctionListState
           context.push(BottomNavigationBarViewPagerPage());
         } else if (_FunctionListPageVM.TABBAR_VIEW_PAGER == item.item.title) {
           context.push(TabViewPagerPage());
+        } else if (_FunctionListPageVM.GRID_VIEW == item.item.title) {
+          context.push(GridPage());
+        } else if (_FunctionListPageVM.WATERFALL_GRID_VIEW == item.item.title) {
+          context.push(WaterfallGridPage());
+        } else if (_FunctionListPageVM.STAGGERED_GRID_VIEW == item.item.title) {
+          context.push(StaggeredGridPage());
         } else if (_FunctionListPageVM.WEB_VIEW == item.item.title) {
           context.push(SimpleWebPage(
             url: "https://www.aliyun.com/",
             title: "WebView示例",
           ));
         }
-      },
-      childItemBuilder: (itemWidget, context) {
-        return Container(
-            width: double.infinity,
-            height: 48,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(color: itemWidget.item.background),
-            margin: const EdgeInsets.only(top: 0.5),
-            child: Text(
-              itemWidget.item.title,
-              style: const TextStyle(fontSize: 16, color: Color(0xff333333)),
-            ));
       },
     );
   }
@@ -65,6 +77,9 @@ class _FunctionListPageVM extends BaseListVM<MainTitle> {
   static const String PERMISSION = "权限申请";
   static const String BOTTOM_VIEW_PAGER = "BottomNavigationBarViewPager";
   static const String TABBAR_VIEW_PAGER = "TabbarViewPager";
+  static const String GRID_VIEW = "GridView";
+  static const String WATERFALL_GRID_VIEW = "WaterfallGridView";
+  static const String STAGGERED_GRID_VIEW = "StaggeredGridView";
   static const String WEB_VIEW = "WebView";
 
   @override
@@ -79,6 +94,9 @@ class _FunctionListPageVM extends BaseListVM<MainTitle> {
       MainTitle(PERMISSION),
       MainTitle(BOTTOM_VIEW_PAGER),
       MainTitle(TABBAR_VIEW_PAGER),
+      MainTitle(GRID_VIEW),
+      MainTitle(WATERFALL_GRID_VIEW),
+      MainTitle(STAGGERED_GRID_VIEW),
       MainTitle(WEB_VIEW),
     ]);
   }
