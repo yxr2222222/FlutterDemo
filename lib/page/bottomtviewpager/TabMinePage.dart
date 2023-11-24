@@ -3,7 +3,7 @@ import 'package:yxr_flutter_basic/base/ui/page/BasePage.dart';
 import 'package:yxr_flutter_basic/base/vm/BaseVM.dart';
 
 class TabMinePage extends BasePage {
-  TabMinePage({super.key});
+  TabMinePage({super.key, super.isCanBackPressed = false});
 
   @override
   State<BasePage> createState() => _MinePageState();
@@ -22,9 +22,4 @@ class _MinePageState extends BasePageState<_MineVM, TabMinePage> {
   bool get wantKeepAlive => true;
 }
 
-class _MineVM extends BaseVM {
-  @override
-  Future<bool> onBackPressed() async {
-    return false;
-  }
-}
+class _MineVM extends BaseVM {}

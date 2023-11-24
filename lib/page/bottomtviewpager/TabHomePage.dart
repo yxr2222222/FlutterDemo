@@ -3,7 +3,7 @@ import 'package:yxr_flutter_basic/base/ui/page/BasePage.dart';
 import 'package:yxr_flutter_basic/base/vm/BaseVM.dart';
 
 class TabHomePage extends BasePage {
-  TabHomePage({super.key});
+  TabHomePage({super.key, super.isCanBackPressed = false});
 
   @override
   State<BasePage> createState() => _HomePageState();
@@ -23,8 +23,5 @@ class _HomePageState extends BasePageState<_HomeVM, TabHomePage> {
 }
 
 class _HomeVM extends BaseVM {
-  @override
-  Future<bool> onBackPressed() async {
-    return false;
-  }
+
 }

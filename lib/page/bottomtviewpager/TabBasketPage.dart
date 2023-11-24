@@ -3,7 +3,7 @@ import 'package:yxr_flutter_basic/base/ui/page/BasePage.dart';
 import 'package:yxr_flutter_basic/base/vm/BaseVM.dart';
 
 class TabBasketPage extends BasePage {
-  TabBasketPage({super.key});
+  TabBasketPage({super.key, super.isCanBackPressed = false});
 
   @override
   State<BasePage> createState() => _BasketPageState();
@@ -23,8 +23,5 @@ class _BasketPageState extends BasePageState<_BasketVM, TabBasketPage> {
 }
 
 class _BasketVM extends BaseVM {
-  @override
-  Future<bool> onBackPressed() async {
-    return false;
-  }
+
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_demo/page/event/EventPage1.dart';
 import 'package:flutter_demo/page/grid/GridPage.dart';
 import 'package:flutter_demo/page/grid/StaggeredGridPage.dart';
 import 'package:flutter_demo/page/grid/WaterfallGridPage.dart';
@@ -49,6 +50,8 @@ class _FunctionListState
           }, onDenied: (isPermanentlyDenied) {
             showToast("权限申请失败,是否被多次拒绝或永久拒绝: $isPermanentlyDenied");
           }));
+        } else if (_FunctionListPageVM.LIVE_EVENT == item.item.title) {
+          context.push(EventPage1());
         } else if (_FunctionListPageVM.PRODUCT_LIST == item.item.title) {
           context.push(ProductListPage());
         } else if (_FunctionListPageVM.BOTTOM_VIEW_PAGER == item.item.title) {
@@ -75,6 +78,7 @@ class _FunctionListState
 class _FunctionListPageVM extends BaseListVM<MainTitle> {
   static const String PRODUCT_LIST = "商品列表界面";
   static const String PERMISSION = "权限申请";
+  static const String LIVE_EVENT = "LiveEvent";
   static const String BOTTOM_VIEW_PAGER = "BottomNavigationBarViewPager";
   static const String TABBAR_VIEW_PAGER = "TabbarViewPager";
   static const String GRID_VIEW = "GridView";
@@ -92,6 +96,7 @@ class _FunctionListPageVM extends BaseListVM<MainTitle> {
     refreshData(isClear: true, dataList: [
       MainTitle(PRODUCT_LIST),
       MainTitle(PERMISSION),
+      MainTitle(LIVE_EVENT),
       MainTitle(BOTTOM_VIEW_PAGER),
       MainTitle(TABBAR_VIEW_PAGER),
       MainTitle(GRID_VIEW),

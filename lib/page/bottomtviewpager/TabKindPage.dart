@@ -3,7 +3,7 @@ import 'package:yxr_flutter_basic/base/ui/page/BasePage.dart';
 import 'package:yxr_flutter_basic/base/vm/BaseVM.dart';
 
 class TabKindPage extends BasePage {
-  TabKindPage({super.key});
+  TabKindPage({super.key, super.isCanBackPressed = false});
 
   @override
   State<BasePage> createState() => _KindPageState();
@@ -25,8 +25,5 @@ class _KindPageState extends BasePageState<_KindVM, TabKindPage> {
 }
 
 class _KindVM extends BaseVM {
-  @override
-  Future<bool> onBackPressed() async {
-    return false;
-  }
+
 }

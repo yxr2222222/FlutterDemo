@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_demo/page/tabviewpager/TabViewPagerChildPage.dart';
 import 'package:yxr_flutter_basic/base/model/controller/SimpleGetxController.dart';
 import 'package:yxr_flutter_basic/base/ui/page/BaseMultiStatePage.dart';
+import 'package:yxr_flutter_basic/base/ui/page/BasePageViewPage.dart';
 import 'package:yxr_flutter_basic/base/ui/widget/TabbarViewPager.dart';
 import 'package:yxr_flutter_basic/base/util/GetBuilderUtil.dart';
 import 'package:yxr_flutter_basic/base/vm/BaseMultiVM.dart';
@@ -15,29 +16,52 @@ class TabViewPagerPage extends BaseMultiPage {
 
 class _TabViewPagerState
     extends BaseMultiPageState<_TabViewPagerVM, TabViewPagerPage> {
+  final KeepAliveController _keepAliveController = KeepAliveController();
+
   @override
   _TabViewPagerVM createViewModel() => _TabViewPagerVM();
 
   @override
   Widget createMultiContentWidget(
       BuildContext context, _TabViewPagerVM viewModel) {
-    return GetBuilderUtil.builder(
-        (controller) => TabbarViewPager(
-              controller.data ?? [],
-              tabbarIndicatorColor: const Color(0xffef4e4e),
-              preNextPage: true,
-              onPageChanged: (index) {
-                viewModel.currPageController.data = index;
-              },
-            ),
-        init: viewModel.tabbarController);
+    return GetBuilderUtil.builder((controller) {
+      List<String> tabList = [];
+      for (var element in controller.dataNotNull) {
+        tabList.add(element.title);
+      }
+      return TabbarViewPager(
+        tabList: tabList,
+        onPageBuilder: (context, index) => TabViewPagerChildPage(
+          title: controller.dataNotNull[index].content,
+          pageIndex: index,
+          keepAliveController: _keepAliveController,
+        ),
+
+        /// onTabBuilder为空则使用默认的tab视图
+        onTabBuilder: (context, index, title) => _buildTab(title),
+        tabbarIndicatorColor: const Color(0xffef4e4e),
+        preNextPage: true,
+        onPageChanged: (index) {
+          _keepAliveController.changePage(index);
+        },
+      );
+    }, init: viewModel.tabbarController);
   }
+
+  /// 创建tab子控件
+  Widget _buildTab(String title) => Container(
+        alignment: Alignment.center,
+        height: 48,
+        child: Text(
+          title,
+          style: const TextStyle(color: Colors.black, fontSize: 16),
+        ),
+      );
 }
 
 class _TabViewPagerVM extends BaseMultiVM {
-  final SimpleGetxController<List<TabbarViewPagerData>> tabbarController =
+  final SimpleGetxController<List<TabData>> tabbarController =
       SimpleGetxController([]);
-  final SimpleGetxController<int> currPageController = SimpleGetxController(0);
 
   @override
   void onCreate() {
@@ -53,31 +77,18 @@ class _TabViewPagerVM extends BaseMultiVM {
     Future.delayed(const Duration(seconds: 2), () {
       showContentState();
 
-      List<TabbarViewPagerData> dataList = [];
+      List<TabData> dataList = [];
       for (int i = 0; i < 10; i++) {
-        dataList.add(TabbarViewPagerData(
-            _buildTab("Title $i"),
-
-            /// ViewPager的内容控件通过GetBuilder绑定，页面改变时用来更新wantKeepAlive
-            GetBuilderUtil.builder(
-                (controller) => TabViewPagerChildPage(
-                      title: "Title $i",
-                      pageIndex: i,
-                      currPage: controller.dataNotNull,
-                    ),
-                init: currPageController)));
+        dataList.add(TabData("Title $i", "content $i"));
       }
       tabbarController.data = dataList;
     });
   }
+}
 
-  /// 创建tab子控件
-  Widget _buildTab(String title) => Container(
-        alignment: Alignment.center,
-        height: 48,
-        child: Text(
-          title,
-          style: const TextStyle(color: Colors.black, fontSize: 16),
-        ),
-      );
+class TabData {
+  final String title;
+  final String content;
+
+  TabData(this.title, this.content);
 }

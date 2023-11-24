@@ -1,40 +1,31 @@
 import 'package:flutter/cupertino.dart';
 import 'package:yxr_flutter_basic/base/config/ColorConfig.dart';
-import 'package:yxr_flutter_basic/base/ui/page/BasePage.dart';
+import 'package:yxr_flutter_basic/base/ui/page/BasePageViewPage.dart';
 import 'package:yxr_flutter_basic/base/util/Log.dart';
-import 'package:yxr_flutter_basic/base/vm/BaseVM.dart';
+import 'package:yxr_flutter_basic/base/vm/BaseMultiVM.dart';
 
-class TabViewPagerChildPage extends BasePage {
+class TabViewPagerChildPage extends BasePageViewPage {
   final String title;
-  final int pageIndex;
-  final int currPage;
 
-  TabViewPagerChildPage(
-      {super.key,
-      required this.title,
-      required this.pageIndex,
-      required this.currPage});
+  TabViewPagerChildPage({
+    super.key,
+    super.isCanBackPressed = false,
+    required super.pageIndex,
+    required super.keepAliveController,
+    required this.title,
+  });
 
   @override
-  State<BasePage> createState() => _TabViewPagerChildState();
+  State<BasePageViewPage> createState() => _TabViewPagerChildState();
 }
 
 class _TabViewPagerChildState
-    extends BasePageState<_TabViewPagerChildVM, TabViewPagerChildPage> {
-
+    extends BasePageViewState<_TabViewPagerChildVM, TabViewPagerChildPage> {
   @override
   _TabViewPagerChildVM createViewModel() => _TabViewPagerChildVM();
 
-  /// viewpager需要左右各keep alive几个
-  static const int off_limit = 1;
-
-  /// 通过wantKeepAlive来判断当前tab是否需要keep alive
   @override
-  bool get wantKeepAlive =>
-      (widget.pageIndex - widget.currPage).abs() <= off_limit;
-
-  @override
-  Widget createContentWidget(
+  Widget createMultiContentWidget(
       BuildContext context, _TabViewPagerChildVM viewModel) {
     return Container(
       width: double.infinity,
@@ -51,14 +42,6 @@ class _TabViewPagerChildState
   }
 
   @override
-  void didUpdateWidget(covariant TabViewPagerChildPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.currPage != widget.currPage) {
-      updateKeepAlive();
-    }
-  }
-
-  @override
   void onCreate() {
     super.onCreate();
     Log.d("onCreate...${widget.pageIndex}");
@@ -71,10 +54,4 @@ class _TabViewPagerChildState
   }
 }
 
-class _TabViewPagerChildVM extends BaseVM {
-  /// 因为嵌套在page内，所以要屏蔽掉返回事件
-  @override
-  Future<bool> onBackPressed() async {
-    return false;
-  }
-}
+class _TabViewPagerChildVM extends BaseMultiVM {}

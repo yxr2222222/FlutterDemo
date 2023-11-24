@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:yxr_flutter_basic/base/extension/BuildContextExtension.dart';
 import 'package:yxr_flutter_basic/base/ui/page/BaseMultiStatePage.dart';
-import 'package:yxr_flutter_basic/base/ui/widget/BaseItemWidget.dart';
 import 'package:yxr_flutter_basic/base/vm/BaseListVM.dart';
 
 class WaterfallGridPage extends BaseMultiPage {
