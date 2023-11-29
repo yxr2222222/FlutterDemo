@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_demo/page/anima/AnimaPage.dart';
 import 'package:flutter_demo/page/event/EventPage1.dart';
 import 'package:flutter_demo/page/grid/GridPage.dart';
 import 'package:flutter_demo/page/grid/StaggeredGridPage.dart';
@@ -64,6 +65,8 @@ class _FunctionListState
           context.push(WaterfallGridPage());
         } else if (_FunctionListPageVM.STAGGERED_GRID_VIEW == item.item.title) {
           context.push(StaggeredGridPage());
+        } else if (_FunctionListPageVM.ANIMA_WIDGET == item.item.title) {
+          context.push(AnimaPage());
         } else if (_FunctionListPageVM.WEB_VIEW == item.item.title) {
           context.push(SimpleWebPage(
             url: "https://www.aliyun.com/",
@@ -84,6 +87,7 @@ class _FunctionListPageVM extends BaseListVM<MainTitle> {
   static const String GRID_VIEW = "GridView";
   static const String WATERFALL_GRID_VIEW = "WaterfallGridView";
   static const String STAGGERED_GRID_VIEW = "StaggeredGridView";
+  static const String ANIMA_WIDGET = "属性动画组件";
   static const String WEB_VIEW = "WebView";
 
   @override
@@ -102,6 +106,7 @@ class _FunctionListPageVM extends BaseListVM<MainTitle> {
       MainTitle(GRID_VIEW),
       MainTitle(WATERFALL_GRID_VIEW),
       MainTitle(STAGGERED_GRID_VIEW),
+      MainTitle(ANIMA_WIDGET),
       MainTitle(WEB_VIEW),
     ]);
   }

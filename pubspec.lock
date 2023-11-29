@@ -857,10 +857,10 @@ packages:
     dependency: "direct main"
     description:
       name: yxr_flutter_basic
-      sha256: bce30ad99278ffb4fc34976eb9412ca1517a141560b15e4badc2862095d586ae
+      sha256: c9edae203828c18d08822b570c6965b4046ea0d2f061a2fae140268985ad8ef1
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.6"
+    version: "0.1.7"
 sdks:
   dart: ">=3.1.4 <4.0.0"
   flutter: ">=3.13.0"

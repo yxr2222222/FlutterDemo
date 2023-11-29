@@ -32,7 +32,7 @@ dependencies:
     sdk: flutter
 
   # 集成yxr_flutter_basic依赖
-  yxr_flutter_basic: ^0.1.6
+  yxr_flutter_basic: ^0.1.7
 #  yxr_flutter_basic:
 #    path: ../yxr_flutter_basic
 
