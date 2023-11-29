@@ -4,6 +4,7 @@ import 'package:yxr_flutter_basic/base/ui/widget/AnimaWidget.dart';
 import 'package:yxr_flutter_basic/base/util/Log.dart';
 import 'package:yxr_flutter_basic/base/vm/BaseMultiVM.dart';
 
+/// 属性动画组件示例
 class AnimaPage extends BaseMultiPage {
   AnimaPage({super.key});
 
@@ -34,9 +35,11 @@ class _AnimaState extends BaseMultiPageState<_AnimaVM, AnimaPage> {
 
   /// 构建动画组件
   Widget _buildAnimaWidget(double maxWidth, double maxHeight) => AnimaWidget(
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 2000),
       animationCtx: _animationCtx,
       onChildBuilder: (context, value) {
+        /// 动画属性变化，根据属性值来做相应的变化
+        /// Demo此处是改变Positioned的left、top达到平移的效果
         var left = (maxWidth - 50) * value;
         var top = (maxHeight - 50) * value;
         Log.d("onAnima....value: $value, left: $left, top: $top");
