@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/model/product_detail.dart';
 import 'package:flutter_demo/page/product/ProductDetailPage.dart';
+import 'package:yxr_flutter_basic/base/config/ColorConfig.dart';
 import 'package:yxr_flutter_basic/base/extension/BuildContextExtension.dart';
 import 'package:yxr_flutter_basic/base/model/BaseResp.dart';
 import 'package:yxr_flutter_basic/base/model/PageResult.dart';
+import 'package:yxr_flutter_basic/base/style/SimpleBorderRadius.dart';
 import 'package:yxr_flutter_basic/base/ui/CacheImage.dart';
 import 'package:yxr_flutter_basic/base/ui/page/BaseMultiStatePage.dart';
 import 'package:yxr_flutter_basic/base/vm/BasePageListVM.dart';
@@ -39,6 +41,9 @@ class _ProductListState
                 width: 64,
                 height: 64,
                 imageUrl: item.item.product.pic ?? "",
+                borderRadius: SimpleBorderRadius.radius32(),
+                borderWidth: 2,
+                borderColor: ColorConfig.blue_007aff,
               ),
               Expanded(
                   child: Container(
@@ -88,6 +93,14 @@ class _ProductListVM extends BasePageListVM<TesItem, List<Product>> {
 
     productApi = createApi(ProductApi());
 
+    /// 先展示loading状态页面
+    showLoadingState();
+  }
+
+  @override
+  void onDelayCreate() {
+    super.onDelayCreate();
+    /// 避免复杂页面渲染导致页面切换动画卡顿，可以在延迟加载中进行数据初始化
     firstLoad(multiStateLoading: true);
   }
 
