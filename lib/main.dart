@@ -70,7 +70,7 @@ class MyApp extends StatelessWidget {
     var image = productDetail.data?.brand?.bigPic;
     if (image != null) {
       return SplashContent(
-          content: CacheImage.simple(imageUrl: image),
+          content: CacheImage.simple(imageUrl: image, height: double.infinity),
           countDownSeconds: 5);
     }
     return SplashContent(

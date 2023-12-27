@@ -441,7 +441,7 @@ packages:
     source: hosted
     version: "2.0.1"
   path:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: path
       sha256: "8829d8a55c13fc0e37127c29fedf290c102f4e40ae94ada574091fe0ff96c917"
@@ -889,10 +889,10 @@ packages:
     dependency: "direct main"
     description:
       name: yxr_flutter_basic
-      sha256: cd0a4acbd2f1c9dbc35d67f1111d9516cefd985fd0296a953327b2368886c980
+      sha256: "9a61798d51b4cb71f9c9507da8d82efcce6075814983d07e62043a094ba6696d"
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.8"
+    version: "0.2.0"
 sdks:
   dart: ">=3.1.4 <4.0.0"
   flutter: ">=3.13.0"
